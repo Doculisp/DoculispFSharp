@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Doculisp.Lib", "Lib\Doculisp.Lib.fsproj", "{1B25FCF8-8AEF-440F-AEA6-70EA9D4CAE46}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Doculisp.Tests", "Tests\Doculisp.Tests.fsproj", "{9FB669D1-23F7-4268-9C78-5FDEEC34D887}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B25FCF8-8AEF-440F-AEA6-70EA9D4CAE46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B25FCF8-8AEF-440F-AEA6-70EA9D4CAE46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B25FCF8-8AEF-440F-AEA6-70EA9D4CAE46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B25FCF8-8AEF-440F-AEA6-70EA9D4CAE46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FB669D1-23F7-4268-9C78-5FDEEC34D887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FB669D1-23F7-4268-9C78-5FDEEC34D887}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FB669D1-23F7-4268-9C78-5FDEEC34D887}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FB669D1-23F7-4268-9C78-5FDEEC34D887}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
