@@ -24,6 +24,19 @@
         }
     },
     "verboseMode": false,
-    "aliases": [],
+    "aliases": [
+        {
+            "name": "test",
+            "command": "cls; dotnet test && gittey commit"
+        },
+        {
+            "name": "push",
+            "command": "gittey test && git push"
+        },
+        {
+            "name": "undo",
+            "command": "git reset; git checkout .; git clean -xfd; gittey test"
+        }
+    ],
     "collaborators": []
 }
