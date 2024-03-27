@@ -8,3 +8,10 @@ let (|IsNewLine|_|) = function
     | '\n'::tail ->
         Some ("\n", tail)
     | _ -> None
+    
+let (|IsWhiteSpace|_|) = function
+    | IsNewLine (ln, tail) ->
+        Some (ln, tail)
+    | c::tail when c |> System.Char.IsWhiteSpace ->
+        Some ($"%c{c}", tail)
+    | _ -> None

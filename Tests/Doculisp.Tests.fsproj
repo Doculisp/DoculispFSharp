@@ -1,30 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
-    <GenerateProgramFile>false</GenerateProgramFile>
-    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Helpers.fs" />
     <Compile Include="Document\map when mapping text should.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="3.2.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Archer.Arrow.Lib" Version="0.0.0.43" />
+    <PackageReference Include="Archer.Bow.Lib" Version="0.0.9.39" />
+    <PackageReference Include="Archer.CoreTypes.Lib" Version="0.0.13.42" />
+    <PackageReference Include="Archer.Fletching.Lib" Version="0.0.0.33" />
+    <PackageReference Include="Archer.Logger.Lib" Version="0.0.0.6" />
+    <PackageReference Include="MicroLang.Lib" Version="0.0.12.58" />
   </ItemGroup>
 
   <ItemGroup>
