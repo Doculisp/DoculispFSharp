@@ -21,7 +21,7 @@ var x = 2 + 2;
         text
         |> Document.map
         |> Should.BeOk [
-            TextMap (text, { Line = 0; Char = 0 })
+            TextMap { Value = text; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 
@@ -35,7 +35,7 @@ let ``map a multiline code block containing Doculisp code`` =
         text
         |> Document.map
         |> Should.BeOk [
-            TextMap (text, { Line = 0; Char = 0 })
+            TextMap { Value = text; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 
@@ -51,7 +51,7 @@ This creates a list with numbers."
         text
         |> Document.map
         |> Should.BeOk [
-            TextMap (text, { Line = 0; Char = 0 })
+            TextMap { Value = text; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 
@@ -65,7 +65,7 @@ let ``map a multiline code block containing a multiline code block`` =
         text
         |> Document.map
         |> Should.BeOk [
-            TextMap (text, { Line = 0; Char = 0 })
+            TextMap { Value = text; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 

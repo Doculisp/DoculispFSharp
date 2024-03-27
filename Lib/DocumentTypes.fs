@@ -1,14 +1,14 @@
 ﻿module Doculisp.Lib.DocumentTypes
 
 type DocumentMap =
-    | TextMap of string * Coordinate
-    | LispMap of string * Coordinate
+    | TextMap of Value
+    | LispMap of Value
     member this.Coordinate with get () =
         match this with
-        | TextMap (_, coordinate)
-        | LispMap (_, coordinate) -> coordinate
+        | TextMap { Value = _; Coordinate = coordinate }
+        | LispMap { Value = _; Coordinate = coordinate } -> coordinate
         
     member this.Value with get () =
         match this with
-        | TextMap (value, _)
-        | LispMap (value, _) -> value
+        | TextMap { Value = value; Coordinate = _ }
+        | LispMap { Value = value; Coordinate = _ } -> value

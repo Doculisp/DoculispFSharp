@@ -17,7 +17,7 @@ let ``map a doculisp block`` =
         "<!-- (dl (# My Heading)) -->"
         |> Document.map
         |> Should.BeOk [
-            LispMap ("(dl (# My Heading))", { Line = 0; Char = 5 })
+            LispMap { Value = "(dl (# My Heading))"; Coordinate = { Line = 0; Char = 5 } }
         ]
     )
 
@@ -30,7 +30,7 @@ Just look at its dynamic-ness
 -->"
         |> Document.map
         |> Should.BeOk [
-            LispMap ("(dl (# My New Heading))", { Line = 2; Char = 6 })
+            LispMap { Value = "(dl (# My New Heading))"; Coordinate = { Line = 2; Char = 6 } }
         ]
     )
 
@@ -45,9 +45,9 @@ Just look at its dynamic-ness
 -->"
         |> Document.map
         |> Should.BeOk [
-            LispMap ("(dl
+            LispMap { Value = "(dl
         (# My New Heading)
-     )", { Line = 2; Char = 5 })
+     )"; Coordinate = { Line = 2; Char = 5 } }
         ]
     )
 
@@ -62,9 +62,9 @@ Just look at its dynamic-ness
 -->"
         |> Document.map
         |> Should.BeOk [
-            LispMap (@"(dl
+            LispMap { Value = @"(dl
        (# My New \(Heading)
-     )", { Line = 2; Char = 5 })
+     )"; Coordinate = { Line = 2; Char = 5 } }
         ]
     )
 

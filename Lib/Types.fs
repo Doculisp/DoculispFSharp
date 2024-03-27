@@ -8,3 +8,9 @@ type Coordinate =
     }
     override this.ToString () =
         $"(%d{this.Line}, %d{this.Char})"
+
+type Value =
+    {
+        Value: string
+        Coordinate: Coordinate
+    }

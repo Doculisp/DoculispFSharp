@@ -49,7 +49,7 @@ let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
             tail
             |> map linePtr (charPtr + 1) (depth - 1) start $"%s{current})"
         | ')'::tail, Some st ->
-            Ok (LispMap ($"%s{current})", st), linePtr, charPtr, tail)
+            Ok (LispMap { Value = $"%s{current})"; Coordinate = st }, linePtr, charPtr, tail)
         | IsNewLine (ln, tail), _ ->
             tail
             |> map (linePtr + 1) 0 depth start $"%s{current}%s{ln}"
@@ -69,7 +69,7 @@ let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char 
             tail
             |> map linePtr (charPtr + ln.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{ln}"
         | IsMultiline (ln, tail), Some st ->
-            Ok (TextMap ($"%s{current}%s{ln}", st), linePtr, charPtr + ln.Length, tail)
+            Ok (TextMap { Value = $"%s{current}%s{ln}"; Coordinate = st }, linePtr, charPtr + ln.Length, tail)
         | IsEscaped '`' (esc, tail), _ ->
             tail
             |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
@@ -95,7 +95,7 @@ let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char lis
             tail
             |> map linePtr (charPtr + inl.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{inl}"
         | IsInline (inl, tail), Some st ->
-            Ok (TextMap ($"%s{current}%s{inl}", st), linePtr, charPtr, tail)
+            Ok (TextMap { Value = $"%s{current}%s{inl}"; Coordinate = st }, linePtr, charPtr, tail)
         | IsNewLine _, Some st ->
             Error $"Inline code block at %s{st.ToString ()} contains a new line."
         | c::tail, _ ->
@@ -138,12 +138,12 @@ let private mapText (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
         match document, start with
         | [], Some st ->
-            Ok (TextMap (current.Trim(), st), linePtr, charPtr, document)
+            Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
         | IsNewLine (ln, tail), _ ->
             tail
             |> map (linePtr + 1) 0 start $"%s{current}%s{ln}"
         | IsOpenComment _, Some st ->
-            Ok (TextMap (current.Trim (), st), linePtr, charPtr, document)
+            Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
         | IsEscaped '`' (esc, tail), None ->
             tail
             |> map linePtr (charPtr + esc.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{esc}"

@@ -18,7 +18,7 @@ let ``map an inline code block`` =
         "`var x = 13`"
         |> Document.map
         |> Should.BeOk [
-            TextMap ("`var x = 13`", { Line = 0; Char = 0 })
+            TextMap { Value = "`var x = 13`"; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 
@@ -27,7 +27,7 @@ let ``map an inline code block containing a html comment`` =
         "`<!-- My Comment -->`"
         |> Document.map
         |> Should.BeOk [
-            TextMap ("`<!-- My Comment -->`", { Line = 0; Char = 0 })
+            TextMap { Value = "`<!-- My Comment -->`"; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 
@@ -36,7 +36,7 @@ let ``map an inline code block containing an unclosed html comment`` =
         "`<!-- My Comment`"
         |> Document.map
         |> Should.BeOk [
-            TextMap ("`<!-- My Comment`", { Line = 0; Char = 0 })
+            TextMap { Value = "`<!-- My Comment`"; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 
@@ -45,7 +45,7 @@ let ``map an inline code block containing an inline code block`` =
         "`\`var c = 'c'\``"
         |> Document.map
         |> Should.BeOk [
-            TextMap (@"`\`var c = 'c'\``", { Line = 0; Char = 0 })
+            TextMap { Value = @"`\`var c = 'c'\``"; Coordinate = { Line = 0; Char = 0 } }
         ]
     )
 
@@ -70,8 +70,8 @@ let ``not map an escaped back-tick`` =
         @"\`<!-- My Comment -->\`"
         |> Document.map
         |> Should.BeOk [
-            TextMap (@"\`", { Line = 0; Char = 0 })
-            TextMap (@"\`", { Line = 0; Char = 21 })
+            TextMap { Value = @"\`"; Coordinate = { Line = 0; Char = 0 } }
+            TextMap { Value = @"\`"; Coordinate = { Line = 0; Char = 21 } }
         ]
     )
 

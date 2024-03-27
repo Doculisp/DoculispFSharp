@@ -31,8 +31,8 @@ let ``ignore a comment surrounded with text`` =
         "My cool <!-- Some piffy comment -->   world"
         |> Document.map
         |> Should.BeOk [
-            TextMap ("My cool", { Line = 0; Char = 0 })
-            TextMap ("world", { Line = 0; Char = 38 })
+            TextMap { Value = "My cool"; Coordinate = { Line = 0; Char = 0 } }
+            TextMap { Value = "world"; Coordinate = { Line = 0; Char = 38 } }
         ]
     )
 
@@ -43,8 +43,8 @@ let ``ignore a multiline comment surrounded with text`` =
 world"
         |> Document.map
         |> Should.BeOk [
-            TextMap ("My cool", { Line = 0; Char = 0 })
-            TextMap ("world", { Line = 2; Char = 0 })
+            TextMap { Value = "My cool"; Coordinate = { Line = 0; Char = 0 } }
+            TextMap { Value = "world"; Coordinate = { Line = 2; Char = 0 } }
         ]
     )
     
