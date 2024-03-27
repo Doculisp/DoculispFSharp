@@ -32,5 +32,6 @@ runner
     Document.``map when mapping text should``.``Test Cases``
     Document.``map when mapping comments should``.``Test Cases``
     Document.``map when mapping inline code blocks should``.``Test Cases``
+    Document.``map when mapping multiline code block should``.``Test Cases``
 ]
 |> runAndReport

@@ -18,7 +18,35 @@ let private (|IsInline|_|) = function
     | '`'::tail ->
         Some ("`", tail)
     | _ -> None
-    
+
+let private (|IsMultiline|_|) = function
+    | '`'::'`'::'`'::tail ->
+        Some ("```", tail)
+    | _ -> None
+
+let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
+    let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
+        match document, start with
+        | [], Some st ->
+            Error $"Multiline code block at %s{st.ToString ()} is not closed."
+        | IsMultiline (ln, tail), None ->
+            tail
+            |> map linePtr (charPtr + ln.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{ln}"
+        | IsMultiline (ln, tail), Some st ->
+            Ok (TextMap ($"%s{current}%s{ln}", st), linePtr, charPtr + ln.Length, tail)
+        | IsEscaped '`' (esc, tail), _ ->
+            tail
+            |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
+        | IsNewLine (ln, tail), _ ->
+            tail
+            |> map (linePtr + 1) 0 start $"%s{current}%s{ln}"
+        | c::tail, _ ->
+            tail
+            |> map linePtr (charPtr + 1) start $"%s{current}%c{c}"
+
+    document
+    |> map linePtr charPtr None ""
+
 let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
         match document, start with
@@ -34,10 +62,10 @@ let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char lis
         | c::tail, _ ->
             tail
             |> map linePtr (charPtr + 1) start $"%s{current}%c{c}"
-        
+
     document
     |> map linePtr charPtr None ""
-    
+
 let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (document: char list) =
         match document, start with
@@ -73,6 +101,26 @@ let private mapText (linePtr: int) (charPtr: int) (document: char list) =
         | IsEscaped '`' (esc, tail), _ ->
             tail
             |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
+        | IsMultiline _, None ->
+            let result =
+                document
+                |> mapMultilineCodeBlock linePtr charPtr
+
+            match result with
+            | Ok (mapped, ln, c, tail) ->
+                tail
+                |> map ln c (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{mapped.Value}"
+            | Error errorMessage -> Error errorMessage
+        | IsMultiline _, _ ->
+            let result =
+                document
+                |> mapMultilineCodeBlock linePtr charPtr
+
+            match result with
+            | Ok (mapped, ln, c, tail) ->
+                tail
+                |> map ln c start $"%s{current}%s{mapped.Value}"
+            | Error errorMessage -> Error errorMessage
         | IsInline _, None _ ->
             let result =
                 document
