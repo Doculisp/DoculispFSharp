@@ -40,6 +40,15 @@ let ``map an inline code block containing an unclosed html comment`` =
         ]
     )
 
+let ``map an inline code block containing an inline code block`` =
+    feature.Test (fun _ ->
+        "`\`var c = 'c'\``"
+        |> Document.map
+        |> Should.BeOk [
+            TextMap (@"`\`var c = 'c'\``", { Line = 0; Char = 0 })
+        ]
+    )
+
 let ``error if there is a new line before it closes`` =
     feature.Test (fun _ ->
         "example: `var name = \"Alpha\"

@@ -88,6 +88,9 @@ let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char lis
         match document, start with
         | [], Some st ->
             Error $"Inline code block at %s{st.ToString ()} is not closed."
+        | IsEscaped '`' (esc, tail), _ ->
+            tail
+            |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
         | IsInline (inl, tail), None ->
             tail
             |> map linePtr (charPtr + inl.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{inl}"
