@@ -3,8 +3,7 @@
 open Doculisp.Lib.TextHelpers
 open Doculisp.Lib.DocumentTypes
 
-let private (|IsOpenComment|_|) document =
-    match document with
+let private (|IsOpenComment|_|) = function
     | '<'::'!'::'-'::'-'::tail ->
         Some ("<!--", tail)
     | _ -> None
@@ -23,6 +22,43 @@ let private (|IsMultiline|_|) = function
     | '`'::'`'::'`'::tail ->
         Some ("```", tail)
     | _ -> None
+
+let private (|IsStartLisp|_|) = function
+    | '('::'d'::'l'::c::tail when c |> System.Char.IsWhiteSpace ->
+        Some ($"(dl", c::tail)
+    | _ -> None
+
+let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
+    let rec map (linePtr: int) (charPtr: int) (depth: int) (start: Coordinate option) (current: string) (document: char list) =
+        match document, start with
+        | [], Some st ->
+            Error $"Doculisp block at %s{st.ToString ()} is not closed."
+        | IsStartLisp (lisp, tail), None ->
+            tail
+            |> map linePtr (charPtr + lisp.Length) (depth + 1) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{lisp}"
+        | IsEscaped '(' (esc, tail), _ ->
+            tail
+            |> map linePtr (charPtr + esc.Length) depth start $"%s{current}%s{esc}"
+        | IsEscaped ')' (esc, tail), _ ->
+            tail
+            |> map linePtr (charPtr + esc.Length) depth start $"%s{current}%s{esc}"
+        | '('::tail, _ ->
+            tail
+            |> map linePtr (charPtr + 1) (depth + 1) start $"%s{current}("
+        | ')'::tail, _ when 1 < depth ->
+            tail
+            |> map linePtr (charPtr + 1) (depth - 1) start $"%s{current})"
+        | ')'::tail, Some st ->
+            Ok (LispMap ($"%s{current})", st), linePtr, charPtr, tail)
+        | IsNewLine (ln, tail), _ ->
+            tail
+            |> map (linePtr + 1) 0 depth start $"%s{current}%s{ln}"
+        | c::tail, _ ->
+            tail
+            |> map linePtr (charPtr + 1) depth start $"%s{current}%c{c}"
+
+    document
+    |> map linePtr charPtr 0 None ""
 
 let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
@@ -67,23 +103,33 @@ let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char lis
     |> map linePtr charPtr None ""
 
 let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
-    let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (document: char list) =
+    let rec map (linePtr: int) (charPtr: int) (acc: DocumentMap list) (start: Coordinate option) (document: char list) =
         match document, start with
         | [], Some st -> Error $"Comment at %s{st.ToString ()} is not closed."
         | IsOpenComment (op, tail), None ->
             tail
-            |> map linePtr (charPtr + op.Length) (Some { Line = linePtr; Char = charPtr })
+            |> map linePtr (charPtr + op.Length) acc (Some { Line = linePtr; Char = charPtr })
         | IsCloseComment (cl, tail), Some _ ->
-            Ok (linePtr, charPtr + cl.Length, tail)
+            Ok (acc, linePtr, charPtr + cl.Length, tail)
         | IsNewLine (_, tail), _ ->
             tail
-            |> map (linePtr + 1) 0 start
+            |> map (linePtr + 1) 0 acc start
+        | IsStartLisp _, _ ->
+            let result =
+                document
+                |> mapLisp linePtr charPtr
+
+            match result with
+            | Ok (mapped, ln, c, tail) ->
+                tail
+                |> map ln c (mapped::acc) start
+            | Error errorValue -> Error errorValue
         | _::tail, _ ->
             tail
-            |> map linePtr (charPtr + 1) start
+            |> map linePtr (charPtr + 1) acc start
         
     document
-    |> map linePtr charPtr None
+    |> map linePtr charPtr [] None
 
 let private mapText (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
@@ -157,7 +203,7 @@ let map (document: char seq) =
         match document with
         | [] ->
             acc
-            |> List.sortBy (fun t -> t.Coordinate)
+            |> List.sortBy (_.Coordinate)
             |> Ok
         | IsNewLine (_, tail) ->
             tail
@@ -171,9 +217,9 @@ let map (document: char seq) =
                 |> mapComment linePtr charPtr
                 
             match result with
-            | Ok (line, c, tail) ->
+            | Ok (lisps, line, c, tail) ->
                 tail
-                |> map line c acc
+                |> map line c ([lisps; acc] |> List.concat)
             | Error errorMessage -> Error errorMessage
         | _ ->
             let result =

@@ -8,7 +8,7 @@ open Doculisp.Lib.DocumentTypes
 let private feature = Arrow.NewFeature (
     TestTags [
         Category "Document"
-        Category "Text"
+        Category "Comments"
     ]
 )
 

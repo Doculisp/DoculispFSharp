@@ -10,6 +10,7 @@
     <Compile Include="Document\map when mapping comments should.fs" />
     <Compile Include="Document\map when mapping inline code blocks should.fs" />
     <Compile Include="Document\map when mapping multiline code block should.fs" />
+    <Compile Include="Document\map when mapping doculisp block should.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

@@ -8,7 +8,8 @@ open Doculisp.Lib.DocumentTypes
 let private feature = Arrow.NewFeature (
     TestTags [
         Category "Document"
-        Category "Text"
+        Category "Multiline Code Block"
+        Category "Code Block"
     ]
 )
 
