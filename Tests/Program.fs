@@ -30,5 +30,6 @@ runner.RunnerLifecycleEvent
 runner
 |> addMany [
     Document.``map when mapping text should``.``Test Cases``
+    Document.``map when mapping comments should``.``Test Cases``
 ]
 |> runAndReport
