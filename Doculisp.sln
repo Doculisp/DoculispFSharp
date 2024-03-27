@@ -7,6 +7,12 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Doculisp.Lib", "Lib\Doculis
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Doculisp.Tests", "Tests\Doculisp.Tests.fsproj", "{9FB669D1-23F7-4268-9C78-5FDEEC34D887}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{229155F9-A7BB-402F-97D4-4BB94C304D35}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		gittey-config.json = gittey-config.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
