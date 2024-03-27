@@ -65,4 +65,11 @@ let ``not map an escaped back-tick`` =
         ]
     )
 
+let ``not map a commented out code block`` =
+    feature.Test (fun _ ->
+        "<!-- `let x = y |> doSomething` -->"
+        |> Document.map
+        |> Should.BeOk []
+    )
+
 let ``Test Cases`` = feature.GetTests ()
