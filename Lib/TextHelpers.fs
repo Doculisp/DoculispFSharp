@@ -15,3 +15,9 @@ let (|IsWhiteSpace|_|) = function
     | c::tail when c |> System.Char.IsWhiteSpace ->
         Some ($"%c{c}", tail)
     | _ -> None
+    
+
+let (|IsEscaped|_|) value = function
+    | '\\'::c::tail when c = value ->
+        Some ($"\\%c{c}", tail)
+    | _ -> None

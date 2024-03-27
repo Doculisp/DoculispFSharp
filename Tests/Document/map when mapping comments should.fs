@@ -47,5 +47,13 @@ world"
             TextMap ("world", { Line = 2; Char = 0 })
         ]
     )
+    
+let ``error when the comment block is unclosed`` =
+    feature.Test (fun _ ->
+        "My awesome text
+to be hold <!-- not really"
+        |> Document.map
+        |> Should.BeError "Comment at (1, 11) is not closed."
+    )
 
 let ``Test Cases`` = feature.GetTests ()

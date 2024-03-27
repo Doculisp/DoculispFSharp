@@ -3,7 +3,8 @@
 open Doculisp.Lib.TextHelpers
 open Doculisp.Lib.DocumentTypes
 
-let private (|IsOpenComment|_|) = function
+let private (|IsOpenComment|_|) document =
+    match document with
     | '<'::'!'::'-'::'-'::tail ->
         Some ("<!--", tail)
     | _ -> None
@@ -13,10 +14,34 @@ let private (|IsCloseComment|_|) = function
         Some ("-->", tail)
     | _ -> None
     
+let private (|IsInline|_|) = function
+    | '`'::tail ->
+        Some ("`", tail)
+    | _ -> None
+    
+let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
+    let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
+        match document, start with
+        | [], Some st ->
+            Error $"Inline code block at %s{st.ToString ()} is not closed."
+        | IsInline (inl, tail), None ->
+            tail
+            |> map linePtr (charPtr + inl.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{inl}"
+        | IsInline (inl, tail), Some st ->
+            Ok (TextMap ($"%s{current}%s{inl}", st), linePtr, charPtr, tail)
+        | IsNewLine _, Some st ->
+            Error $"Inline code block at %s{st.ToString ()} contains a new line."
+        | c::tail, _ ->
+            tail
+            |> map linePtr (charPtr + 1) start $"%s{current}%c{c}"
+        
+    document
+    |> map linePtr charPtr None ""
+    
 let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (document: char list) =
         match document, start with
-        | [], Some st -> Error $"Comment at %s{st.ToString ()} is not closed"
+        | [], Some st -> Error $"Comment at %s{st.ToString ()} is not closed."
         | IsOpenComment (op, tail), None ->
             tail
             |> map linePtr (charPtr + op.Length) (Some { Line = linePtr; Char = charPtr })
@@ -36,15 +61,38 @@ let private mapText (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
         match document, start with
         | [], Some st ->
-            TextMap (current.Trim(), st), linePtr, charPtr, document
+            Ok (TextMap (current.Trim(), st), linePtr, charPtr, document)
         | IsNewLine (ln, tail), _ ->
             tail
             |> map (linePtr + 1) 0 start $"%s{current}%s{ln}"
-        | IsWhiteSpace (sp, tail), None ->
-            tail
-            |> map linePtr (charPtr + sp.Length) start current
         | IsOpenComment _, Some st ->
-            TextMap (current.Trim (), st), linePtr, charPtr, document 
+            Ok (TextMap (current.Trim (), st), linePtr, charPtr, document)
+        | IsEscaped '`' (esc, tail), None ->
+            tail
+            |> map linePtr (charPtr + esc.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{esc}"
+        | IsEscaped '`' (esc, tail), _ ->
+            tail
+            |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
+        | IsInline _, None _ ->
+            let result =
+                document
+                |> mapInlineCodeBlock linePtr charPtr
+                
+            match result with
+            | Ok (mapped, line, c, tail) ->
+                tail
+                |> map line c (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{mapped.Value}"
+            | Error errorMessage -> Error errorMessage
+        | IsInline _, Some _ ->
+            let result =
+                document
+                |> mapInlineCodeBlock linePtr charPtr
+                
+            match result with
+            | Ok (mapped, line, c, tail) ->
+                tail
+                |> map line c start $"%s{current}%s{mapped.Value}"
+            | Error errorMessage -> Error errorMessage
         | c::tail, None ->
             tail
             |> map linePtr (charPtr + 1) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%c{c}"
@@ -80,11 +128,15 @@ let map (document: char seq) =
                 |> map line c acc
             | Error errorMessage -> Error errorMessage
         | _ ->
-            let mapped, line, c, tail =
+            let result =
                 document
                 |> mapText linePtr charPtr
-            tail
-            |> map line c (mapped::acc)
+                
+            match result with
+            | Ok (mapped, line, c, tail) ->
+                tail
+                |> map line c (mapped::acc)
+            | Error errorMessage -> Error errorMessage
         
     document
     |> List.ofSeq

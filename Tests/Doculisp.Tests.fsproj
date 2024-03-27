@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="Document\map when mapping text should.fs" />
     <Compile Include="Document\map when mapping comments should.fs" />
+    <Compile Include="Document\map when mapping inline code blocks should.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
