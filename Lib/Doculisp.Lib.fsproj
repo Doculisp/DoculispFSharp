@@ -10,6 +10,8 @@
     <Compile Include="Types.fs" />
     <Compile Include="DocumentTypes.fs" />
     <Compile Include="Document.fs" />
+    <Compile Include="TokenTypes.fs" />
+    <Compile Include="Tokenizer.fs" />
   </ItemGroup>
 
 </Project>

@@ -6,15 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestHelpers.fs" />
     <Compile Include="Document\map when mapping text should.fs" />
     <Compile Include="Document\map when mapping comments should.fs" />
     <Compile Include="Document\map when mapping inline code blocks should.fs" />
     <Compile Include="Document\map when mapping multiline code block should.fs" />
     <Compile Include="Document\map when mapping doculisp block should.fs" />
+    <Compile Include="Tokenizer parse should.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ApprovalTests" Version="6.0.0" />
+    <PackageReference Include="ApprovalUtilities" Version="6.0.0" />
     <PackageReference Include="Archer.Arrow.Lib" Version="0.0.0.43" />
     <PackageReference Include="Archer.Bow.Lib" Version="0.0.9.39" />
     <PackageReference Include="Archer.CoreTypes.Lib" Version="0.0.13.42" />
