@@ -8,6 +8,7 @@
 
 Here is a list of all the key atoms by depth:
 
+* markdown
 * `dl`
   * `section-meta`
     * `title`
