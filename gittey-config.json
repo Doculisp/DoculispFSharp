@@ -36,6 +36,10 @@
         {
             "name": "undo",
             "command": "git reset; git checkout .; git clean -xfd; gittey test"
+        },
+        {
+            "name": "pull",
+            "command": "git pull; gittey test"
         }
     ],
     "collaborators": []
