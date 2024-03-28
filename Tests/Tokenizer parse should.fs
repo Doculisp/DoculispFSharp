@@ -3,7 +3,6 @@
 open Archer
 open Archer.Arrows
 open Archer.ApprovalsSupport
-open ApprovalTests
 open Doculisp.Lib
 open Doculisp.Lib.TokenTypes
 
@@ -12,22 +11,7 @@ let private feature = Arrow.NewFeature (
         Category "Document"
         Category "Text"
     ],
-    Setup (fun _ ->
-        [
-            Searching
-                |> findFirstReporter<Reporters.DiffReporter>
-                |> findFirstReporter<Reporters.WinMergeReporter>
-                |> findFirstReporter<Reporters.InlineTextReporter>
-                |> findFirstReporter<Reporters.AllFailingTestsClipboardReporter>
-                |> unWrapReporter
-
-            Reporters.ClipboardReporter() :> Core.IApprovalFailureReporter;
-
-            Reporters.QuietReporter() :> Core.IApprovalFailureReporter;
-        ]
-        |> buildReporter
-        |> Ok
-    )
+    setupApprovals
 )
 
 let ``parse an empty map`` =
