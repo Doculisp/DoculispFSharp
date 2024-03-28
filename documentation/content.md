@@ -14,12 +14,12 @@ The only subblock to the content block is the table of contents. This will cause
 
 The structure of the table of contents is `(toc)` there is an optional parameter that can have one of the following values:
 
-* unlabled
-* labled
+* unlabeled
+* labeled
 * numbered
-* numbered-labled
+* numbered-labeled
 * bulleted
-* bulleted-labled
+* bulleted-labeled
 
 Examples
 
@@ -28,7 +28,7 @@ Examples
 ```
 
 ```doculisp
-(contents (toc bulleted-labled))
+(contents (toc bulleted-labeled))
 ```
 
 Any of the options with `labled` on it will use the name of the subsection. 
@@ -42,7 +42,7 @@ Any of the options with `labled` on it will use the name of the subsection.
         )
     )
 
-    (content (toc bulleted-labled))
+    (content (toc bulleted-labeled))
 )
 ```
 
