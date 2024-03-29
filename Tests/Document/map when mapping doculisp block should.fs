@@ -1,9 +1,12 @@
 ﻿module Doculisp.Tests.Document.``map when mapping doculisp block should``
 
+open System
 open Archer
 open Archer.Arrows
+open Archer.ApprovalsSupport
 open Doculisp.Lib
 open Doculisp.Lib.DocumentTypes
+open Doculisp.Tests
 
 let private feature = Arrow.NewFeature (
     TestTags [
@@ -73,6 +76,33 @@ let ``error if the lisp does not properly close`` =
         "<!-- (dl (# My New Heading) -->"
         |> Document.map
         |> Should.BeError "Doculisp block at (0, 5) is not closed."
+    )
+
+let ``map a real markdown document`` =
+    feature.Test(
+        Setup (fun _ ->
+            try
+                let assembly = System.Reflection.Assembly.GetExecutingAssembly ()
+                let resourceName =
+                    assembly.GetManifestResourceNames()
+                    |> Array.filter (fun name -> name.EndsWith "section-meta.md")
+                    |> Array.head
+
+                let markdown =
+                    use stream = assembly.GetManifestResourceStream resourceName
+                    use reader = new System.IO.StreamReader (stream)
+                    reader.ReadToEnd ()
+
+                Ok (markdown, reporter)
+            with
+            | e -> e |> SetupTeardownExceptionFailure |> Error
+        ),
+        TestBody (fun (markdown, reporter) env ->
+            markdown
+            |> Document.map
+            |> formatMap
+            |> Should.MeetStandard reporter env.TestInfo
+        )
     )
 
 let ``Test Cases`` = feature.GetTests ()

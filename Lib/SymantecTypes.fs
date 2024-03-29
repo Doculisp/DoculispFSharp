@@ -65,5 +65,3 @@ and Content =
             | _ -> false
         )
         |> List.map (fun (External e) -> e.TableInfo)
-    
-type Build = unit

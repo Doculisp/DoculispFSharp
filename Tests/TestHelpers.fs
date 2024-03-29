@@ -6,28 +6,66 @@ open Archer.Arrows
 open Archer.ApprovalsSupport
 open ApprovalTests
 open Doculisp.Lib
+open Doculisp.Lib.DocumentTypes
 open Doculisp.Lib.TokenTypes
+
+let reporter =
+    [
+        Searching
+            |> findFirstReporter<Reporters.DiffReporter>
+            |> findFirstReporter<Reporters.WinMergeReporter>
+            |> findFirstReporter<Reporters.InlineTextReporter>
+            |> findFirstReporter<Reporters.AllFailingTestsClipboardReporter>
+            |> unWrapReporter
+
+        Reporters.ClipboardReporter() :> Core.IApprovalFailureReporter;
+
+        Reporters.QuietReporter() :> Core.IApprovalFailureReporter;
+    ]
+    |> buildReporter
 
 let setupApprovals =
     Setup (fun _ ->
-        [
-            Searching
-                |> findFirstReporter<Reporters.DiffReporter>
-                |> findFirstReporter<Reporters.WinMergeReporter>
-                |> findFirstReporter<Reporters.InlineTextReporter>
-                |> findFirstReporter<Reporters.AllFailingTestsClipboardReporter>
-                |> unWrapReporter
-
-            Reporters.ClipboardReporter() :> Core.IApprovalFailureReporter;
-
-            Reporters.QuietReporter() :> Core.IApprovalFailureReporter;
-        ]
-        |> buildReporter
+        reporter
         |> Ok
     )
 
+let formatMaybe (fn: IIndentTransformer -> 'a -> string) (value: Result<'a, string>) =
+    match value with
+    | Error err -> $"Error %A{err}"
+    | Ok good ->
+        let indenter = Indent.IndentTransformer ()
+        let opn = "Ok (" |> indenter.Transform
+        let cls = ")" |> indenter.Transform
+        let value =
+            good
+            |> fn (indenter.Indent 1)
+
+        $"%s{opn}\n%s{value}\n%s{cls}"
+
+let formatMap (maybeMap: Result<DocumentMap list, string>) =
+    let rec format (current: string) (indenter: IIndentTransformer) (maps: DocumentMap list) =
+        match maps with
+        | [] -> current
+        | (TextMap mapped)::tail ->
+            let opn = $"Text %s{mapped.Coordinate.ToString ()} (" |> indenter.Transform
+            let cls = ")" |> indenter.Transform
+            let mdl = mapped.Value |> (indenter.Indent 1).Transform
+            let value = $"%s{opn}\n%s{mdl}\n%s{cls}"
+            tail
+            |> format $"%s{current}\n\n%s{value}" indenter
+        | (LispMap mapped)::tail ->
+            let opn = $"Lisp %s{mapped.Coordinate.ToString ()} (" |> indenter.Transform
+            let cls = ")" |> indenter.Transform
+            let mdl = mapped.Value |> (indenter.Indent 1).Transform
+            let value = $"%s{opn}\n%s{mdl}\n%s{cls}"
+            tail
+            |> format $"%s{current}\n\n%s{value}" indenter
+
+    formatMaybe (format "") maybeMap
+
 let formatTokens (maybeTokens: Result<Token list, string>) =
-    let rec formatLisps (current: string) (indenter: Indent.IIndentTransformer) (tokens: LispToken list) =
+    let rec formatLisps (current: string) (indenter: IIndentTransformer) (tokens: LispToken list) =
         match tokens with
         | [] -> current
         | (Open value)::tail ->
@@ -71,15 +109,4 @@ let formatTokens (maybeTokens: Result<Token list, string>) =
                 tail
                 |> formatTokens $"%s{lispOpen}\n%s{lispString}\n%s{lispClose}" indenter
 
-    let indenter = Indent.IndentTransformer ()
-
-    match maybeTokens with
-    | Ok tokens ->
-        let opn = "Ok (" |> indenter.Transform
-        let cls = ")" |> indenter.Transform
-        let value =
-            tokens
-            |> formatTokens "" (indenter.Indent 1)
-
-        $"%s{opn}\n%s{value}\n%s{cls}"
-    | Error errorValue -> $"Error %A{errorValue}"
+    formatMaybe (formatTokens "") maybeTokens

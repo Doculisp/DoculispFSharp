@@ -134,22 +134,37 @@ let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
     document
     |> map linePtr charPtr [] None
 
-let private mapText (linePtr: int) (charPtr: int) (document: char list) =
-    let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
+let private mapText (linePointer: int) (charPointer: int) (documentChars: char list) =
+    let mutable linePtr = linePointer
+    let mutable charPtr = charPointer
+    let mutable start: Coordinate option = None
+    let mutable current = ""
+    let mutable document: char list = documentChars
+    let mutable finished = false
+    let mutable endResult: Result<DocumentMap * int * int * char list, string> = Error "Not Run"
+
+    while not finished do
         match document, start with
         | [], Some st ->
-            Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
+            endResult <- Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
+            finished <- true
         | IsNewLine (ln, tail), _ ->
-            tail
-            |> map (linePtr + 1) 0 start $"%s{current}%s{ln}"
+            document <- tail
+            linePtr <- linePtr + 1
+            charPtr <- 0
+            current <- $"%s{current}%s{ln}"
         | IsOpenComment _, Some st ->
-            Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
+            endResult <- Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
+            finished <- true
         | IsEscaped '`' (esc, tail), None ->
-            tail
-            |> map linePtr (charPtr + esc.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{esc}"
+            document <- tail
+            start <- (Some { Line = linePtr; Char = charPtr })
+            charPtr <- charPtr + esc.Length
+            current <- $"%s{current}%s{esc}"
         | IsEscaped '`' (esc, tail), _ ->
-            tail
-            |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
+            document <- tail
+            charPtr <- charPtr + esc.Length
+            current <- $"%s{current}%s{esc}"
         | IsMultiline _, None ->
             let result =
                 document
@@ -157,9 +172,14 @@ let private mapText (linePtr: int) (charPtr: int) (document: char list) =
 
             match result with
             | Ok (mapped, ln, c, tail) ->
-                tail
-                |> map ln c (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{mapped.Value}"
-            | Error errorMessage -> Error errorMessage
+                document <- tail
+                start <- (Some { Line = linePtr; Char = charPtr })
+                linePtr <- ln
+                charPtr <- c
+                current <- $"%s{current}%s{mapped.Value}"
+            | Error errorMessage ->
+                endResult <- Error errorMessage
+                finished <- true
         | IsMultiline _, _ ->
             let result =
                 document
@@ -167,38 +187,53 @@ let private mapText (linePtr: int) (charPtr: int) (document: char list) =
 
             match result with
             | Ok (mapped, ln, c, tail) ->
-                tail
-                |> map ln c start $"%s{current}%s{mapped.Value}"
-            | Error errorMessage -> Error errorMessage
+                document <- tail
+                linePtr <- ln
+                charPtr <- c
+                current <- $"%s{current}%s{mapped.Value}"
+            | Error errorMessage ->
+                endResult <- Error errorMessage
+                finished <- true
         | IsInline _, None _ ->
             let result =
                 document
                 |> mapInlineCodeBlock linePtr charPtr
-                
+
             match result with
             | Ok (mapped, line, c, tail) ->
-                tail
-                |> map line c (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{mapped.Value}"
-            | Error errorMessage -> Error errorMessage
+                document <- tail
+                start <- Some { Line = linePtr; Char = charPtr }
+                linePtr <- line
+                charPtr <- c
+                current <- $"%s{current}%s{mapped.Value}"
+            | Error errorMessage ->
+                endResult <- Error errorMessage
+                finished <- true
         | IsInline _, Some _ ->
             let result =
                 document
                 |> mapInlineCodeBlock linePtr charPtr
-                
+
             match result with
             | Ok (mapped, line, c, tail) ->
-                tail
-                |> map line c start $"%s{current}%s{mapped.Value}"
-            | Error errorMessage -> Error errorMessage
+                document <- tail
+                linePtr <- line
+                charPtr <- c
+                current <- $"%s{current}%s{mapped.Value}"
+            | Error errorMessage ->
+                endResult <- Error errorMessage
+                finished <- true
         | c::tail, None ->
-            tail
-            |> map linePtr (charPtr + 1) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%c{c}"
+            document <- tail
+            start <- Some { Line = linePtr; Char = charPtr }
+            charPtr <- charPtr + 1
+            current <- $"%s{current}%c{c}"
         | c::tail, _ ->
-            tail
-            |> map linePtr (charPtr + 1) start $"%s{current}%c{c}"
-            
-    document
-    |> map linePtr charPtr None ""
+            document <- tail
+            charPtr <- charPtr + 1
+            current <- $"%s{current}%c{c}"
+
+    endResult
     
 
 let map (document: char seq) =

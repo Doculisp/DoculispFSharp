@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="section-meta.md" />
     <Compile Include="TestHelpers.fs" />
     <Compile Include="Document\map when mapping text should.fs" />
     <Compile Include="Document\map when mapping comments should.fs" />

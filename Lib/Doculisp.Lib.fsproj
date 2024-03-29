@@ -13,6 +13,7 @@
     <Compile Include="TokenTypes.fs" />
     <Compile Include="Tokenizer.fs" />
     <Compile Include="SymantecTypes.fs" />
+    <Compile Include="SymantecBuilder.fs" />
   </ItemGroup>
 
 </Project>
