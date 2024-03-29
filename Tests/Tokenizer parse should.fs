@@ -108,4 +108,32 @@ let ``error if missing atom`` =
         |> Should.BeError "Open parentheses without atom at (2, 4)."
     )
 
+let ``parse a real file`` =
+    feature.Test (
+        Setup (fun reporter ->
+            try
+                let assembly = System.Reflection.Assembly.GetExecutingAssembly ()
+                let resourceName =
+                    assembly.GetManifestResourceNames()
+                    |> Array.filter (fun name -> name.EndsWith "section-meta.md")
+                    |> Array.head
+
+                let markdown =
+                    use stream = assembly.GetManifestResourceStream resourceName
+                    use reader = new System.IO.StreamReader (stream)
+                    reader.ReadToEnd ()
+
+                Ok (markdown, reporter)
+            with
+            | e -> e |> SetupTeardownExceptionFailure |> Error
+        ),
+        TestBody (fun (markdown, reporter) env ->
+            markdown
+            |> Document.map
+            |> Tokenizer.parse
+            |> formatTokens
+            |> Should.MeetStandard reporter env.TestInfo
+        )
+    )
+
 let ``Test Cases`` = feature.GetTests ()
