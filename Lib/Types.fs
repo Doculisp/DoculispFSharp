@@ -14,3 +14,8 @@ type Value =
         Value: string
         Coordinate: Coordinate
     }
+
+let combine<'a, 'b, 'c> (fn: 'a -> Result<'c, 'b>) (value: Result<'a, 'b>): Result<'c, 'b> =
+    match value with
+    | Error er -> Error er
+    | Ok value -> fn value

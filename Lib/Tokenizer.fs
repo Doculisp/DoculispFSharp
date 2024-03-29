@@ -86,7 +86,7 @@ let private parseLisp (value: Value) =
     |> List.ofSeq
     |> parse value.Coordinate.Line value.Coordinate.Char []
 
-let parse (document: Result<DocumentMap list, string>) =
+let private parseMaps (document: DocumentMap list) =
     let rec parse (acc: Token list) (document: DocumentMap list) =
         match document with
         | [] -> acc |> List.rev |> Ok
@@ -104,8 +104,8 @@ let parse (document: Result<DocumentMap list, string>) =
                 |> parse ((Lisp lisps)::acc)
             | Error errorValue -> Error errorValue
 
-    match document with
-    | Ok maps ->
-        maps
-        |> parse []
-    | Error errorValue -> Error errorValue
+    document
+    |> parse []
+
+let parse (document: Result<DocumentMap list, string>) =
+    combine parseMaps document
