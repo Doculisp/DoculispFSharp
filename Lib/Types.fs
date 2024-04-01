@@ -9,6 +9,12 @@ type Coordinate =
     override this.ToString () =
         $"(%d{this.Line}, %d{this.Char})"
 
+let getCoordinate lineIncrease charIncrease =
+    {
+        Line = lineIncrease + 1
+        Char = charIncrease + 1
+    }
+
 type Value =
     {
         Value: string

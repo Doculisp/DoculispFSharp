@@ -12,33 +12,32 @@ let private feature = Arrow.NewFeature (
     TestTags [
         Category "Document"
         Category "Doculisp"
-    ]
+    ],
+    setupApprovals
 )
 
 let ``map a doculisp block`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "<!-- (dl (# My Heading)) -->"
         |> Document.map
-        |> Should.BeOk [
-            LispMap { Value = "(dl (# My Heading))"; Coordinate = { Line = 0; Char = 5 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map a doculisp block contained with other comments`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "<!--
 My heading is the best
       (dl (# My New Heading))
 Just look at its dynamic-ness
 -->"
         |> Document.map
-        |> Should.BeOk [
-            LispMap { Value = "(dl (# My New Heading))"; Coordinate = { Line = 2; Char = 6 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map a multiline doculisp block contained with other comments`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "<!--
 My heading is the best
      (dl
@@ -47,15 +46,12 @@ My heading is the best
 Just look at its dynamic-ness
 -->"
         |> Document.map
-        |> Should.BeOk [
-            LispMap { Value = "(dl
-        (# My New Heading)
-     )"; Coordinate = { Line = 2; Char = 5 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map a multiline doculisp block with escaped parentheses`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         @"<!--
 My heading is the best
      (dl
@@ -64,23 +60,21 @@ My heading is the best
 Just look at its dynamic-ness
 -->"
         |> Document.map
-        |> Should.BeOk [
-            LispMap { Value = @"(dl
-       (# My New \(Heading)
-     )"; Coordinate = { Line = 2; Char = 5 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``error if the lisp does not properly close`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "<!-- (dl (# My New Heading) -->"
         |> Document.map
-        |> Should.BeError "Doculisp block at (0, 5) is not closed."
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map a real markdown document`` =
     feature.Test(
-        Setup (fun _ ->
+        Setup (fun reporter ->
             try
                 let assembly = System.Reflection.Assembly.GetExecutingAssembly ()
                 let resourceName =

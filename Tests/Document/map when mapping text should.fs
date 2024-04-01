@@ -2,14 +2,17 @@
 
 open Archer
 open Archer.Arrows
+open Archer.ApprovalsSupport
 open Doculisp.Lib
 open Doculisp.Lib.DocumentTypes
+open Doculisp.Tests
 
 let private feature = Arrow.NewFeature (
     TestTags [
         Category "Document"
         Category "Text"
-    ]
+    ],
+    setupApprovals
 )
 
 let ``map an empty document`` =
@@ -20,57 +23,51 @@ let ``map an empty document`` =
     )
 
 let ``map "Hello" as text`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "Hello"
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "Hello"; Coordinate = { Line = 0; Char = 0 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map "Good bye" as text`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "Good Bye"
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "Good Bye"; Coordinate = { Line = 0; Char = 0 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map text followed by spaces`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "Good Bye   "
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "Good Bye"; Coordinate = { Line = 0; Char = 0 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map text surrounded by spaces`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "   Doculisp   "
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "Doculisp"; Coordinate = { Line = 0; Char = 3 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``map text surrounded by spaces and preceded by new lines`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "\r\n\r\n\r\n\r\n   After Lines   "
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "After Lines"; Coordinate = { Line = 4; Char = 3 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
     
 let ``map text that includes new lines`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "# A document\r\n\r\nAbout something"
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "# A document\r\n\r\nAbout something"; Coordinate = { Line = 0; Char = 0 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``Test Cases`` = feature.GetTests ()

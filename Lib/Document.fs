@@ -35,7 +35,7 @@ let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
             Error $"Doculisp block at %s{st.ToString ()} is not closed."
         | IsStartLisp (lisp, tail), None ->
             tail
-            |> map linePtr (charPtr + lisp.Length) (depth + 1) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{lisp}"
+            |> map linePtr (charPtr + lisp.Length) (depth + 1) (charPtr |> getCoordinate linePtr |> Some ) $"%s{current}%s{lisp}"
         | IsEscaped '(' (esc, tail), _ ->
             tail
             |> map linePtr (charPtr + esc.Length) depth start $"%s{current}%s{esc}"
@@ -93,7 +93,7 @@ let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char lis
             |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
         | IsInline (inl, tail), None ->
             tail
-            |> map linePtr (charPtr + inl.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{inl}"
+            |> map linePtr (charPtr + inl.Length) (charPtr |> getCoordinate linePtr |> Some) $"%s{current}%s{inl}"
         | IsInline (inl, tail), Some st ->
             Ok (TextMap { Value = $"%s{current}%s{inl}"; Coordinate = st }, linePtr, charPtr, tail)
         | IsNewLine _, Some st ->
@@ -111,7 +111,7 @@ let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
         | [], Some st -> Error $"Comment at %s{st.ToString ()} is not closed."
         | IsOpenComment (op, tail), None ->
             tail
-            |> map linePtr (charPtr + op.Length) acc (Some { Line = linePtr; Char = charPtr })
+            |> map linePtr (charPtr + op.Length) acc (charPtr |> getCoordinate linePtr |> Some)
         | IsCloseComment (cl, tail), Some _ ->
             Ok (acc, linePtr, charPtr + cl.Length, tail)
         | IsNewLine (_, tail), _ ->
@@ -158,7 +158,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
             finished <- true
         | IsEscaped '`' (esc, tail), None ->
             document <- tail
-            start <- (Some { Line = linePtr; Char = charPtr })
+            start <- (charPtr |> getCoordinate linePtr |> Some)
             charPtr <- charPtr + esc.Length
             current <- $"%s{current}%s{esc}"
         | IsEscaped '`' (esc, tail), _ ->
@@ -173,7 +173,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
             match result with
             | Ok (mapped, ln, c, tail) ->
                 document <- tail
-                start <- (Some { Line = linePtr; Char = charPtr })
+                start <- (charPtr |> getCoordinate linePtr |> Some)
                 linePtr <- ln
                 charPtr <- c
                 current <- $"%s{current}%s{mapped.Value}"
@@ -202,7 +202,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
             match result with
             | Ok (mapped, line, c, tail) ->
                 document <- tail
-                start <- Some { Line = linePtr; Char = charPtr }
+                start <- charPtr |> getCoordinate linePtr |> Some
                 linePtr <- line
                 charPtr <- c
                 current <- $"%s{current}%s{mapped.Value}"
@@ -225,7 +225,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
                 finished <- true
         | c::tail, None ->
             document <- tail
-            start <- Some { Line = linePtr; Char = charPtr }
+            start <- charPtr |> getCoordinate linePtr |> Some
             charPtr <- charPtr + 1
             current <- $"%s{current}%c{c}"
         | c::tail, _ ->

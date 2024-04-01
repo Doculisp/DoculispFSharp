@@ -1,0 +1,13 @@
+﻿Ok (
+
+
+	Text (1, 1) (
+		An example of F#
+		
+		```F#
+		let count = [ 1..100 ]
+		```
+		
+		This creates a list with numbers.
+	)
+)

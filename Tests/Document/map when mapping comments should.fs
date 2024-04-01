@@ -2,14 +2,17 @@
 
 open Archer
 open Archer.Arrows
+open Archer.ApprovalsSupport
 open Doculisp.Lib
 open Doculisp.Lib.DocumentTypes
+open Doculisp.Tests
 
 let private feature = Arrow.NewFeature (
     TestTags [
         Category "Document"
         Category "Comments"
-    ]
+    ],
+    setupApprovals
 )
 
 let ``ignore a comment`` =
@@ -27,33 +30,30 @@ let ``ignore a comment with extra whitespace`` =
     )
 
 let ``ignore a comment surrounded with text`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "My cool <!-- Some piffy comment -->   world"
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "My cool"; Coordinate = { Line = 0; Char = 0 } }
-            TextMap { Value = "world"; Coordinate = { Line = 0; Char = 38 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``ignore a multiline comment surrounded with text`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "My cool
 <!-- Some piffy comment -->
 world"
         |> Document.map
-        |> Should.BeOk [
-            TextMap { Value = "My cool"; Coordinate = { Line = 0; Char = 0 } }
-            TextMap { Value = "world"; Coordinate = { Line = 2; Char = 0 } }
-        ]
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
     
 let ``error when the comment block is unclosed`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "My awesome text
 to be hold <!-- not really"
         |> Document.map
-        |> Should.BeError "Comment at (1, 11) is not closed."
+        |> formatMap
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``Test Cases`` = feature.GetTests ()

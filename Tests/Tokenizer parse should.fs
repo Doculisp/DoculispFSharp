@@ -22,33 +22,31 @@ let ``parse an empty map`` =
     )
 
 let ``error if given an error`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "My bogus error"
         |> Error
         |> Tokenizer.parse
-        |> Should.BeError "My bogus error"
+        |> formatTokens
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``parse text`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "Hello Test"
         |> Document.map
         |> Tokenizer.parse
-        |> Should.BeOk [
-            Text { Value = "Hello Test"; Coordinate = { Line = 0; Char = 0 } }
-        ]
+        |> formatTokens
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``parse multiline text`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "<!-- --> Hello Test
 this is a case"
         |> Document.map
         |> Tokenizer.parse
-        |> Should.BeOk [
-            Text { Value = "Hello Test
-this is a case"; Coordinate = { Line = 0; Char = 9 } }
-        ]
+        |> formatTokens
+        |> Should.MeetStandard reporters env.TestInfo
     )
 
 let ``parse single line Doculisp`` =
@@ -97,7 +95,7 @@ let ``parse multiline Doculisp with parameter that contain parentheses`` =
     )
 
 let ``error if missing atom`` =
-    feature.Test (fun _ ->
+    feature.Test (fun reporters env ->
         "<!--
 (dl
     ( my parameter)
@@ -105,7 +103,8 @@ let ``error if missing atom`` =
 -->"
         |> Document.map
         |> Tokenizer.parse
-        |> Should.BeError "Open parentheses without atom at (2, 4)."
+        |> formatTokens
+        |> Should.MeetStandard reporter env.TestInfo
     )
 
 let ``parse a real file`` =
