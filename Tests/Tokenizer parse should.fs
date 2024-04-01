@@ -4,7 +4,6 @@ open Archer
 open Archer.Arrows
 open Archer.ApprovalsSupport
 open Doculisp.Lib
-open Doculisp.Lib.TokenTypes
 
 let private feature = Arrow.NewFeature (
     TestTags [

@@ -14,6 +14,7 @@
     <Compile Include="Document\map when mapping multiline code block should.fs" />
     <Compile Include="Document\map when mapping doculisp block should.fs" />
     <Compile Include="Tokenizer parse should.fs" />
+    <Compile Include="SymantecBuilder build should.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

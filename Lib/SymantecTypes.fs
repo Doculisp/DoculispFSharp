@@ -65,3 +65,7 @@ and Content =
             | _ -> false
         )
         |> List.map (fun (External e) -> e.TableInfo)
+
+type Tree =
+    | Empty
+    | Content of Content

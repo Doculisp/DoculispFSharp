@@ -8,6 +8,7 @@ open ApprovalTests
 open Doculisp.Lib
 open Doculisp.Lib.DocumentTypes
 open Doculisp.Lib.TokenTypes
+open Doculisp.Lib.SymantecTypes
 
 let reporter =
     [
@@ -110,3 +111,66 @@ let formatTokens (maybeTokens: Result<Token list, string>) =
                 |> formatTokens $"%s{lispOpen}\n%s{lispString}\n%s{lispClose}" indenter
 
     formatMaybe (formatTokens "") maybeTokens
+
+let formatSymantecTree (maybeContent: Result<Tree, string>) =
+    let rec formatContent (indenter: IIndentTransformer) (content: Content) =
+        let getMaybe thing =
+            match thing with
+            | None -> "None"
+            | Some value -> value
+
+        let title = $"Title: %A{content.Title}" |> indenter.Transform
+        let Subtitle = $"Subtitle: %A{content.Subtitle |> getMaybe}" |> indenter.Transform
+        let link = $"Link: %A{content.Link}" |> indenter.Transform
+        let toc = $"Table of Contents: %A{content.Table}"
+        let partsA =
+            let p : string = content.Parts |> formatPart "\n" (indenter.Indent 1)
+            if 0 < p.Length then p
+            else " None"
+
+        let parts =
+            let p = "Parts:" |> indenter.Transform
+            $"%s{p}%s{partsA}"
+
+        $"%s{title}\n%s{Subtitle}\n%s{link}\n%s{toc}\n%s{parts}"
+
+    and formatPart (current: string) (indenter: IIndentTransformer) (parts: Part list) =
+        let modifyCurrent heading text =
+            let opn = $"%s{heading} (" |> indenter.Transform
+            let cls = ")" |> indenter.Transform
+            let value = text |> indenter.Transform
+
+            $"%s{current}\n%s{opn}\n%s{value}\n%s{cls}"
+
+        match parts with
+        | [] -> current
+        | (Markdown text)::tail ->
+            let value = text.Value |> modifyCurrent "Markdown"
+
+            tail
+            |> formatPart value indenter
+        | (Heading heading)::tail ->
+            let pre = "".PadLeft (heading.Depth, '#')
+            let value = $"%s{pre} %s{heading.Value}" |> modifyCurrent "Heading"
+
+            tail
+            |> formatPart value indenter
+        | (External external)::tail ->
+            let ext =
+                $"%d{external.Index}. %s{external.Label}: %s{external.Path}"
+            let content = formatContent indenter external.Content
+
+            let value =
+                $"%s{ext}\n%s{content}"
+                |> modifyCurrent "External"
+
+            tail
+            |> formatPart value indenter
+
+    let formatTree indenter (tree: Tree) =
+        match tree with
+        | Empty -> "Empty"
+        | Content content -> formatContent indenter content
+
+    maybeContent
+    |> formatMaybe formatTree
