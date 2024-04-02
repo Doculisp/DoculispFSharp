@@ -55,7 +55,7 @@ let formatMap (maybeMap: Result<DocumentMap list, string>) =
         match maps with
         | [] -> current
         | (TextMap mapped)::tail ->
-            let opn = $"Text %s{mapped.Coordinate.ToString ()} (" |> indenter.Transform
+            let opn = $"Text Map %s{mapped.Coordinate.ToString ()} (" |> indenter.Transform
             let cls = ")" |> indenter.Transform
             let mdl = mapped.Value |> (indenter.Indent 1).Transform
             let value = $"%s{opn}\n%s{mdl}\n%s{cls}"
@@ -63,7 +63,7 @@ let formatMap (maybeMap: Result<DocumentMap list, string>) =
             tail
             |> format crr indenter
         | (LispMap mapped)::tail ->
-            let opn = $"Lisp %s{mapped.Coordinate.ToString ()} (" |> indenter.Transform
+            let opn = $"Lisp Map %s{mapped.Coordinate.ToString ()} (" |> indenter.Transform
             let cls = ")" |> indenter.Transform
             let mdl = mapped.Value |> (indenter.Indent 1).Transform
             let value = $"%s{opn}\n%s{mdl}\n%s{cls}"
