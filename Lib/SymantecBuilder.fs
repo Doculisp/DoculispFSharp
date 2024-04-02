@@ -1,10 +1,10 @@
 ﻿module Doculisp.Lib.SymantecBuilder
 
 open Doculisp.Lib
-open Doculisp.Lib.DocumentTypes
+open Doculisp.Lib.TokenTypes
 open Doculisp.Lib.SymantecTypes
 
-let private buildTree _ = [] |> Ok
+let private buildTree _ = Empty |> Ok
 
-let build (document: Result<DocumentMap list, string>) =
+let build (document: Result<Token list, string>) =
     combine buildTree document
