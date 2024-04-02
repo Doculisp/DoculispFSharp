@@ -1,10 +1,7 @@
 ﻿Ok (
 	Lisp [
-
-		(dl @ (1, 6)
-			(# @ (1, 10)
-				Parameter: My Heading @ (1, 13)
-			) @ (1, 23)
-		) @ (1, 24)
+		(# @ (1, 10)
+			Parameter: My Heading @ (1, 13)
+		) @ (1, 23)
 	]
 )

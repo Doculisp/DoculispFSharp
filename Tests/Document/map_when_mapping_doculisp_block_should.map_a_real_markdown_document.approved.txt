@@ -1,12 +1,8 @@
 ﻿Ok (
-
-
-	Lisp (2, 1) (
-		(dl
-		    (section-meta
+	Lisp (3, 5) (
+		(section-meta
 		        (title Section Meta Block)
 		    )
-		)
 	)
 
 	Text (9, 1) (
@@ -24,16 +20,16 @@
 		```
 	)
 
-	Lisp (22, 6) (
-		(dl (# Title \(required\)))
+	Lisp (22, 10) (
+		(# Title \(required\))
 	)
 
 	Text (24, 1) (
 		This is the only sub block required for the `section-meta` block. The title is followed by a title that ends at a `)`. Every thing following the white space after the word title and until a new line or a close parenthesis is the title.
 	)
 
-	Lisp (26, 6) (
-		(dl (# Link))
+	Lisp (26, 10) (
+		(# Link)
 	)
 
 	Text (28, 1) (
@@ -49,16 +45,16 @@
 		```
 	)
 
-	Lisp (39, 6) (
-		(dl (# Subtitle))
+	Lisp (39, 10) (
+		(# Subtitle)
 	)
 
 	Text (41, 1) (
 		Subtitle creates a heading that is two levels of heading less then the title directly beneath the title.
 	)
 
-	Lisp (43, 6) (
-		(dl (# External))
+	Lisp (43, 10) (
+		(# External)
 	)
 
 	Text (45, 1) (
@@ -77,8 +73,8 @@
 		```
 	)
 
-	Lisp (59, 6) (
-		(dl (## Sub-Sections))
+	Lisp (59, 10) (
+		(## Sub-Sections)
 	)
 
 	Text (61, 1) (
@@ -115,8 +111,8 @@
 		This will create a subsection called `section` that is built using the file `./two.md`.
 	)
 
-	Lisp (93, 6) (
-		(dl (# Exception to the Rule))
+	Lisp (93, 10) (
+		(# Exception to the Rule)
 	)
 
 	Text (95, 1) (

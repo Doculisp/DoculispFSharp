@@ -1,6 +1,4 @@
 ﻿Ok (
-
-
 	Text (5, 4) (
 		After Lines
 	)

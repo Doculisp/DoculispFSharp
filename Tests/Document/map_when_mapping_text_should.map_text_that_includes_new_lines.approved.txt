@@ -1,6 +1,4 @@
 ﻿Ok (
-
-
 	Text (1, 1) (
 		# A document
 		

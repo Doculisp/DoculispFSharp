@@ -74,6 +74,7 @@ let ``error if the lisp does not properly close`` =
 
 let ``map a real markdown document`` =
     feature.Test(
+        TestTags [Only],
         Setup (fun reporter ->
             try
                 let assembly = System.Reflection.Assembly.GetExecutingAssembly ()

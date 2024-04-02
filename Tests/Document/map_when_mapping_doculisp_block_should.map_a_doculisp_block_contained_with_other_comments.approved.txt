@@ -1,7 +1,5 @@
 ﻿Ok (
-
-
-	Lisp (3, 7) (
-		(dl (# My New Heading))
+	Lisp (3, 11) (
+		(# My New Heading)
 	)
 )

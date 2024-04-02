@@ -62,13 +62,13 @@ let private parseLisp (value: Value) =
 
             match result with
             | None ->
-                Error $"Open parentheses without atom at (%d{linePtr}, %d{charPtr})."
+                Error $"Open parentheses without atom at %s{(charPtr |> getCoordinate linePtr).ToString ()}."
             | Some value ->
                 rest
-                |> parse linePtr c ((Open { Value = value; Coordinate = { Line = linePtr; Char = charPtr } })::acc)
+                |> parse linePtr c ((Open { Value = value; Coordinate = charPtr |> getCoordinate linePtr })::acc)
         | ')'::tail ->
             tail
-            |> parse linePtr (charPtr + 1) ((Close { Line = linePtr; Char = charPtr })::acc)
+            |> parse linePtr (charPtr + 1) ((charPtr |> getCoordinate linePtr |> Close)::acc)
         | _ ->
             let result, c, tail =
                 document
@@ -80,11 +80,13 @@ let private parseLisp (value: Value) =
                 |> parse linePtr c acc
             | Some value ->
                 tail
-                |> parse linePtr c ((Parameter { Value = value; Coordinate = { Line = linePtr; Char = charPtr } })::acc)
+                |> parse linePtr c ((Parameter { Value = value; Coordinate = charPtr |> getCoordinate linePtr })::acc)
 
+    let lineIndex = value.Coordinate.Line - 1
+    let charIndex = value.Coordinate.Char - 1
     value.Value
     |> List.ofSeq
-    |> parse value.Coordinate.Line value.Coordinate.Char []
+    |> parse lineIndex charIndex []
 
 let private parseMaps (document: DocumentMap list) =
     let rec parse (acc: Token list) (document: DocumentMap list) =

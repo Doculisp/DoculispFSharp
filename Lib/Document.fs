@@ -29,36 +29,39 @@ let private (|IsStartLisp|_|) = function
     | _ -> None
 
 let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
-    let rec map (linePtr: int) (charPtr: int) (depth: int) (start: Coordinate option) (current: string) (document: char list) =
+    let rec map (linePtr: int) (charPtr: int) (depth: int) (trueStart: Coordinate) (start: Coordinate option) (current: string) (document: char list) =
         match document, start with
         | [], Some st ->
-            Error $"Doculisp block at %s{st.ToString ()} is not closed."
+            Error $"Doculisp block at %s{trueStart.ToString ()} is not closed."
         | IsStartLisp (lisp, tail), None ->
             tail
-            |> map linePtr (charPtr + lisp.Length) (depth + 1) (charPtr |> getCoordinate linePtr |> Some ) $"%s{current}%s{lisp}"
+            |> map linePtr (charPtr + lisp.Length) (depth + 1) (charPtr |> getCoordinate linePtr) None current
         | IsEscaped '(' (esc, tail), _ ->
             tail
-            |> map linePtr (charPtr + esc.Length) depth start $"%s{current}%s{esc}"
+            |> map linePtr (charPtr + esc.Length) depth trueStart start $"%s{current}%s{esc}"
         | IsEscaped ')' (esc, tail), _ ->
             tail
-            |> map linePtr (charPtr + esc.Length) depth start $"%s{current}%s{esc}"
+            |> map linePtr (charPtr + esc.Length) depth trueStart start $"%s{current}%s{esc}"
+        | '('::tail, None ->
+            tail
+            |> map linePtr (charPtr + 1) (depth + 1) trueStart (charPtr |> getCoordinate linePtr |> Some) $"%s{current}("
         | '('::tail, _ ->
             tail
-            |> map linePtr (charPtr + 1) (depth + 1) start $"%s{current}("
+            |> map linePtr (charPtr + 1) (depth + 1) trueStart start $"%s{current}("
         | ')'::tail, _ when 1 < depth ->
             tail
-            |> map linePtr (charPtr + 1) (depth - 1) start $"%s{current})"
+            |> map linePtr (charPtr + 1) (depth - 1) trueStart start $"%s{current})"
         | ')'::tail, Some st ->
-            Ok (LispMap { Value = $"%s{current})"; Coordinate = st }, linePtr, charPtr, tail)
+            Ok (LispMap { Value = $"%s{current}".Trim(); Coordinate = st }, linePtr, charPtr, tail)
         | IsNewLine (ln, tail), _ ->
             tail
-            |> map (linePtr + 1) 0 depth start $"%s{current}%s{ln}"
+            |> map (linePtr + 1) 0 depth trueStart start $"%s{current}%s{ln}"
         | c::tail, _ ->
             tail
-            |> map linePtr (charPtr + 1) depth start $"%s{current}%c{c}"
+            |> map linePtr (charPtr + 1) depth trueStart start $"%s{current}%c{c}"
 
     document
-    |> map linePtr charPtr 0 None ""
+    |> map linePtr charPtr 0 { Line = -1; Char = -1 } None ""
 
 let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =

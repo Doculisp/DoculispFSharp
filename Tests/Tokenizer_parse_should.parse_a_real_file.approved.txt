@@ -1,13 +1,10 @@
 ﻿Ok (
 	Lisp [
-
-		(dl @ (2, 1)
-			(section-meta @ (3, 4)
-				(title @ (4, 8)
-					Parameter: Section Meta Block @ (4, 15)
-				) @ (4, 33)
-			) @ (5, 4)
-		) @ (6, 0)
+		(section-meta @ (3, 5)
+			(title @ (4, 9)
+				Parameter: Section Meta Block @ (4, 16)
+			) @ (4, 34)
+		) @ (5, 5)
 	]
 	Text (
 		This block is contained directly within the Doculisp main block. It contains information used to build the current secion. This includes things like title, subtitle, and external.
@@ -25,24 +22,18 @@
 		(9, 1)
 	)
 	Lisp [
-
-		(dl @ (22, 6)
-			(# @ (22, 10)
-				Parameter: Title (required) @ (22, 13)
-			) @ (22, 31)
-		) @ (22, 32)
+		(# @ (22, 10)
+			Parameter: Title (required) @ (22, 13)
+		) @ (22, 31)
 	]
 	Text (
 		This is the only sub block required for the `section-meta` block. The title is followed by a title that ends at a `)`. Every thing following the white space after the word title and until a new line or a close parenthesis is the title.
 		(24, 1)
 	)
 	Lisp [
-
-		(dl @ (26, 6)
-			(# @ (26, 10)
-				Parameter: Link @ (26, 13)
-			) @ (26, 17)
-		) @ (26, 18)
+		(# @ (26, 10)
+			Parameter: Link @ (26, 13)
+		) @ (26, 17)
 	]
 	Text (
 		This is the first optional sub block for the `section-meta` block. The link allows you to take over the link to use in the table of contents. Its main purpose is to handle characters in the title that markdown does not include in its section headers. This does not change the section link, but lets you specify a different link to use instead.
@@ -58,24 +49,18 @@
 		(28, 1)
 	)
 	Lisp [
-
-		(dl @ (39, 6)
-			(# @ (39, 10)
-				Parameter: Subtitle @ (39, 13)
-			) @ (39, 21)
-		) @ (39, 22)
+		(# @ (39, 10)
+			Parameter: Subtitle @ (39, 13)
+		) @ (39, 21)
 	]
 	Text (
 		Subtitle creates a heading that is two levels of heading less then the title directly beneath the title.
 		(41, 1)
 	)
 	Lisp [
-
-		(dl @ (43, 6)
-			(# @ (43, 10)
-				Parameter: External @ (43, 13)
-			) @ (43, 21)
-		) @ (43, 22)
+		(# @ (43, 10)
+			Parameter: External @ (43, 13)
+		) @ (43, 21)
 	]
 	Text (
 		This allows you to break each section up into sub-sections that are composed in seperate files. This allows you to limit the scope of work in each file making it easier to find where you need to edit and focus on a single idea.
@@ -94,12 +79,9 @@
 		(45, 1)
 	)
 	Lisp [
-
-		(dl @ (59, 6)
-			(## @ (59, 10)
-				Parameter: Sub-Sections @ (59, 14)
-			) @ (59, 26)
-		) @ (59, 27)
+		(## @ (59, 10)
+			Parameter: Sub-Sections @ (59, 14)
+		) @ (59, 26)
 	]
 	Text (
 		The `external` block is composed of sub-section blocks. These blocks are different then other doculisp blocks. They are custom named blocks. Which means the name of each block is decided by the programmer the same way a varible name is. The format of these blocks is `(` followed by a name followed by whitespace. After the white space is the file path that leads to the document containing the information on how to build the sub-section. Followed again by an optional new line and whitespace. Ending in `)`.
@@ -136,12 +118,9 @@
 		(61, 1)
 	)
 	Lisp [
-
-		(dl @ (93, 6)
-			(# @ (93, 10)
-				Parameter: Exception to the Rule @ (93, 13)
-			) @ (93, 34)
-		) @ (93, 35)
+		(# @ (93, 10)
+			Parameter: Exception to the Rule @ (93, 13)
+		) @ (93, 34)
 	]
 	Text (
 		Comment block breaks this rule slightly. The astrict character is a special character that cause all atoms that start with to be treated as a comment, and all parameters and sub blocks to be ignored.

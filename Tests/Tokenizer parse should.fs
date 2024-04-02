@@ -94,7 +94,7 @@ let ``parse multiline Doculisp with parameter that contain parentheses`` =
     )
 
 let ``error if missing atom`` =
-    feature.Test (fun reporters env ->
+    feature.Test (fun reporter env ->
         "<!--
 (dl
     ( my parameter)

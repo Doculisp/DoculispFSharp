@@ -31,6 +31,12 @@ let setupApprovals =
         |> Ok
     )
 
+let private addTo (current:string) (join: string) (follow: string) =
+        if 0 < current.Length then
+            $"%s{current}%s{join}%s{follow}"
+        else
+            $"%s{follow}"
+
 let formatMaybe (fn: IIndentTransformer -> 'a -> string) (value: Result<'a, string>) =
     match value with
     | Error err -> $"Error %A{err}"
@@ -53,15 +59,17 @@ let formatMap (maybeMap: Result<DocumentMap list, string>) =
             let cls = ")" |> indenter.Transform
             let mdl = mapped.Value |> (indenter.Indent 1).Transform
             let value = $"%s{opn}\n%s{mdl}\n%s{cls}"
+            let crr = value |> addTo current "\n\n"
             tail
-            |> format $"%s{current}\n\n%s{value}" indenter
+            |> format crr indenter
         | (LispMap mapped)::tail ->
             let opn = $"Lisp %s{mapped.Coordinate.ToString ()} (" |> indenter.Transform
             let cls = ")" |> indenter.Transform
             let mdl = mapped.Value |> (indenter.Indent 1).Transform
             let value = $"%s{opn}\n%s{mdl}\n%s{cls}"
+            let crr = value |> addTo current "\n\n"
             tail
-            |> format $"%s{current}\n\n%s{value}" indenter
+            |> format crr indenter
 
     formatMaybe (format "") maybeMap
 
@@ -71,17 +79,20 @@ let formatTokens (maybeTokens: Result<Token list, string>) =
         | [] -> current
         | (Open value)::tail ->
             let opn = $"(%s{value.Value} @ %s{value.Coordinate.ToString ()}" |> indenter.Transform
+            let crr = opn |> addTo current "\n"
             tail
-            |> formatLisps $"%s{current}\n%s{opn}" (indenter.Indent 1)
+            |> formatLisps crr (indenter.Indent 1)
         | (Parameter value)::tail ->
             let param = $"Parameter: %s{value.Value} @ %s{value.Coordinate.ToString ()}" |> indenter.Transform
+            let crr = param |> addTo current "\n"
             tail
-            |> formatLisps $"%s{current}\n%s{param}" indenter
+            |> formatLisps crr indenter
         | (Close coordinate)::tail ->
             let ind = indenter.Indent -1
             let cls = $") @ %s{coordinate.ToString ()}" |> ind.Transform
+            let crr = cls |> addTo current "\n"
             tail
-            |> formatLisps $"%s{current}\n%s{cls}" ind
+            |> formatLisps crr ind
 
     let rec formatTokens (current: string) (indenter: Indent.IIndentTransformer) (tokens: Token list) =
         match tokens with
@@ -94,8 +105,10 @@ let formatTokens (maybeTokens: Result<Token list, string>) =
                 let textClose = indenter.Transform ")"
                 $"%s{textOpen}\n%s{xformed}\n%s{coord}\n%s{textClose}"
 
+            let crr = v |> addTo current "\n"
+
             tail
-            |> formatTokens $"%s{current}\n%s{v}" indenter
+            |> formatTokens crr indenter
         | (Lisp lisps)::tail ->
             let lispOpen = "Lisp [" |> indenter.Transform
             let lispClose = "]" |> indenter.Transform
@@ -103,12 +116,9 @@ let formatTokens (maybeTokens: Result<Token list, string>) =
                 lisps
                 |> formatLisps "" (indenter.Indent 1)
 
-            if 0 < current.Length then
-                tail
-                |> formatTokens $"%s{current}\n%s{lispOpen}\n%s{lispString}\n%s{lispClose}" indenter
-            else
-                tail
-                |> formatTokens $"%s{lispOpen}\n%s{lispString}\n%s{lispClose}" indenter
+            let crr = $"%s{lispOpen}\n%s{lispString}\n%s{lispClose}" |> addTo current "\n"
+            tail
+            |> formatTokens crr indenter
 
     formatMaybe (formatTokens "") maybeTokens
 
@@ -140,7 +150,7 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
             let cls = ")" |> indenter.Transform
             let value = text |> indenter.Transform
 
-            $"%s{current}\n%s{opn}\n%s{value}\n%s{cls}"
+            $"%s{opn}\n%s{value}\n%s{cls}" |> addTo current "\n"
 
         match parts with
         | [] -> current
