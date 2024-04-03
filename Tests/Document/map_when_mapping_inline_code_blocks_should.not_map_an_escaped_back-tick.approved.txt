@@ -1,9 +1,9 @@
 ﻿Ok (
-	Text (1, 1) (
+	Text Map (1, 1) (
 		\`
 	)
 
-	Text (1, 22) (
+	Text Map (1, 22) (
 		\`
 	)
 )

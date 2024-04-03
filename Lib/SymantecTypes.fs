@@ -22,19 +22,32 @@ type TableOfContentsInfo =
         Title: string
         Link: string
     }
+
+type LoadState<'a> =
+    | Waiting
+    | Loaded of 'a
     
 type External =
     {
         Path: string
         Label: string
-        Content: Content
+        Content: LoadState<Content>
         Index: int
     }
     member this.Title with get () =
-        this.Content.Title
+        match this.Content with
+        | Waiting -> ""
+        | Loaded content -> content.Title
         
     member this.Link with get () =
-        this.Content.Link
+        match this.Content with
+        | Waiting -> ""
+        | Loaded content -> content.Link
+
+    member this.IsLoaded with get () =
+        match this.Content with
+        | Waiting -> false
+        | Loaded _ -> true
         
     member this.TableInfo with get () =
         {

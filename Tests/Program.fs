@@ -35,5 +35,6 @@ runner
     Document.``map when mapping multiline code block should``.``Test Cases``
     Document.``map when mapping doculisp block should``.``Test Cases``
     ``Tokenizer parse should``.``Test Cases``
+    ``SymantecBuilder build should``.``Test Cases``
 ]
 |> runAndReport

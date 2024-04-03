@@ -74,19 +74,9 @@ let ``error if the lisp does not properly close`` =
 
 let ``map a real markdown document`` =
     feature.Test(
-        TestTags [Only],
         Setup (fun reporter ->
             try
-                let assembly = System.Reflection.Assembly.GetExecutingAssembly ()
-                let resourceName =
-                    assembly.GetManifestResourceNames()
-                    |> Array.filter (fun name -> name.EndsWith "section-meta.md")
-                    |> Array.head
-
-                let markdown =
-                    use stream = assembly.GetManifestResourceStream resourceName
-                    use reader = new System.IO.StreamReader (stream)
-                    reader.ReadToEnd ()
+                let markdown = openMarkdown ()
 
                 Ok (markdown, reporter)
             with

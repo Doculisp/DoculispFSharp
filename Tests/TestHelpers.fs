@@ -31,6 +31,20 @@ let setupApprovals =
         |> Ok
     )
 
+let openMarkdown () =
+    let assembly = System.Reflection.Assembly.GetExecutingAssembly ()
+    let resourceName =
+        assembly.GetManifestResourceNames()
+        |> Array.filter (fun name -> name.EndsWith "section-meta.md")
+        |> Array.head
+
+    let markdown =
+        use stream = assembly.GetManifestResourceStream resourceName
+        use reader = new System.IO.StreamReader (stream)
+        reader.ReadToEnd ()
+
+    markdown
+
 let private addTo (current:string) (join: string) (follow: string) =
         if 0 < current.Length then
             $"%s{current}%s{join}%s{follow}"
@@ -144,6 +158,11 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
 
         $"%s{title}\n%s{Subtitle}\n%s{link}\n%s{toc}\n%s{parts}"
 
+    and formatLoadState (indenter: IIndentTransformer) (content: LoadState<Content>) =
+        match content with
+        | Waiting -> "Waiting for Content..." |> indenter.Transform
+        | Loaded content -> formatContent indenter content
+
     and formatPart (current: string) (indenter: IIndentTransformer) (parts: Part list) =
         let modifyCurrent heading text =
             let opn = $"%s{heading} (" |> indenter.Transform
@@ -168,7 +187,7 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
         | (External external)::tail ->
             let ext =
                 $"%d{external.Index}. %s{external.Label}: %s{external.Path}"
-            let content = formatContent indenter external.Content
+            let content = formatLoadState indenter external.Content
 
             let value =
                 $"%s{ext}\n%s{content}"
