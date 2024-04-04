@@ -35,7 +35,7 @@
         },
         {
             "name": "push",
-            "command": "gittey pull && git push"
+            "command": "gittey test && git push"
         },
         {
             "name": "undo",
