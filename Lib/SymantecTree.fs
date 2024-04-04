@@ -6,7 +6,7 @@ open Doculisp.Lib.SymantecTypes
 
 let private formatHeading (depth: int) (text: string) =
     let hd = "".PadLeft (depth + 1, '#')
-    $"%s{hd} %s{text}"
+    $"%s{hd} %s{text} %s{hd}"
 
 type private Builder (builder: StringBuilder) =
     member this.AppendWithSpace (text: string) =
