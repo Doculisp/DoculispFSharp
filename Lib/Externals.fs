@@ -2,14 +2,7 @@
 
 open Doculisp.Lib
 open Doculisp.Lib.SymantecTypes
-
-let private loadFile (path: string) =
-    try
-        path
-        |> System.IO.File.ReadAllText
-        |> Ok
-    with
-    | e -> Error $"%A{e}"
+open Doculisp.Lib.IoHelpers
 
 let rec private loadExternals (externals: External list) =
     let rec loadExternals (acc: External list) (externals: External list) =
