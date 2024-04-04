@@ -389,17 +389,20 @@ let private buildTree (tokens: Token list) =
         match partsMaybe with
         | Error errorValue -> Error errorValue
         | Ok (parts, _) ->
-            {
-                Title = ""
-                Subtitle = None
-                Link = ""
-                Table = NoTable
-                Coordinate = { Line = -1; Char = -1 }
-                Parts = parts
-                Externals = []
-            }
-            |> Content
-            |> Ok
+            if 0 < parts.Length then
+                {
+                    Title = ""
+                    Subtitle = None
+                    Link = ""
+                    Table = NoTable
+                    Coordinate = { Line = -1; Char = -1 }
+                    Parts = parts
+                    Externals = []
+                }
+                |> Content
+                |> Ok
+            else
+                Empty |> Ok
 
     | Ok (found, Content content, tail) ->
         let result = tail |> getParts found (0 < content.Externals.Length)
