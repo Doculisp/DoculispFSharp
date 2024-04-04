@@ -59,8 +59,13 @@ type External =
 and Part =
     | Markdown of Value
     | Heading of Heading
-    | External of External
-    
+    | ContentPlaceHolder of Coordinate
+    member this.Coordinate with get () =
+        match this with
+        | Markdown value -> value.Coordinate
+        | Heading heading -> heading.Coordinate
+        | ContentPlaceHolder coordinate -> coordinate
+
 and Content =
     {
         Title: string
@@ -69,15 +74,11 @@ and Content =
         Table: TableOfContentsDefinition
         Coordinate: Coordinate
         Parts: Part list
+        Externals: External list
     }
     member this.TableInfo with get () =
-        this.Parts
-        |> List.filter (fun part ->
-            match part with
-            | External _ -> true
-            | _ -> false
-        )
-        |> List.map (fun (External e) -> e.TableInfo)
+        this.Externals
+        |> List.map _.TableInfo
 
 type Tree =
     | Empty

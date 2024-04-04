@@ -6,38 +6,44 @@ open Archer.ApprovalsSupport
 open Doculisp.Lib
 open Doculisp.Lib.SymantecTypes
 
-let private feature = Arrow.Ignore (
+let private feature = Arrow.NewFeature (
     TestTags [
         Category "Document"
         Category "Text"
+        Only
     ],
     setupApprovals
 )
 
 let ``build from empty tokens`` =
-    feature.Test (fun _ ->
-        []
-        |> Ok
-        |> SymantecBuilder.build
-        |> Should.BeEqualTo (Ok Empty)
+    feature.Test (
+        TestBody(fun _ ->
+            []
+            |> Ok
+            |> SymantecBuilder.build
+            |> Should.BeEqualTo (Ok Empty)
+        )
     )
 
 let ``build symantec tree for text`` =
-    feature.Test (fun reporter env ->
-        "Hello world"
-        |> Document.map
-        |> Tokenizer.parse
-        |> SymantecBuilder.build
-        |> formatSymantecTree
-        |> Should.MeetStandard reporter env.TestInfo
+    feature.Test (
+        TestBody(fun reporter env ->
+            "Hello world"
+            |> Document.map
+            |> Tokenizer.parse
+            |> SymantecBuilder.build
+            |> formatSymantecTree
+            |> Should.MeetStandard reporter env.TestInfo
+        )
     )
 
 let ``build symantec tree document containing simple doculisp`` =
-    feature.Test (fun reporter env ->
-        "<!--
+    feature.Test (
+        TestBody (fun reporter env ->
+            "<!--
 (dl
     (section-meta
-        (title My document
+        (title My document)
     )
 )
 -->
@@ -45,18 +51,19 @@ let ``build symantec tree document containing simple doculisp`` =
 ## A hardcoded heading
 
 with some text"
-        |> Document.map
-        |> Tokenizer.parse
-        |> SymantecBuilder.build
-        |> formatSymantecTree
-        |> Should.MeetStandard reporter env.TestInfo
+            |> Document.map
+            |> Tokenizer.parse
+            |> SymantecBuilder.build
+            |> formatSymantecTree
+            |> Should.MeetStandard reporter env.TestInfo
+        )
     )
 
 let ``build symantec tree for real document`` =
     feature.Test (
         Setup (fun reporter ->
             try
-                let markdown = openMarkdown ()
+                let markdown = openMarkdownFile ()
 
                 Ok (markdown, reporter)
             with

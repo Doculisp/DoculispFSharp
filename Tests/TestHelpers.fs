@@ -31,7 +31,7 @@ let setupApprovals =
         |> Ok
     )
 
-let openMarkdown () =
+let openMarkdownFile () =
     let assembly = System.Reflection.Assembly.GetExecutingAssembly ()
     let resourceName =
         assembly.GetManifestResourceNames()
@@ -144,19 +144,26 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
             | Some value -> value
 
         let title = $"Title: %A{content.Title}" |> indenter.Transform
-        let Subtitle = $"Subtitle: %A{content.Subtitle |> getMaybe}" |> indenter.Transform
+        let subtitle = $"Subtitle: %A{content.Subtitle |> getMaybe}" |> indenter.Transform
         let link = $"Link: %A{content.Link}" |> indenter.Transform
-        let toc = $"Table of Contents: %A{content.Table}"
-        let partsA =
-            let p : string = content.Parts |> formatPart "\n" (indenter.Indent 1)
-            if 0 < p.Length then p
-            else " None"
+        let toc = $"Table of Contents: %A{content.Table}" |> indenter.Transform
 
         let parts =
+            let parts : string =
+                if 0 < content.Parts.Length then
+                    content.Parts |> formatPart "\n" (indenter.Indent 1)
+                else " None"
             let p = "Parts:" |> indenter.Transform
-            $"%s{p}%s{partsA}"
+            $"%s{p}%s{parts}"
 
-        $"%s{title}\n%s{Subtitle}\n%s{link}\n%s{toc}\n%s{parts}"
+        let external =
+            if 0 < content.Externals.Length then
+                content.Externals
+                |> formatExternals "" indenter
+            else "Externals: None" |> indenter.Transform
+
+        [title; subtitle; link; toc; external; parts]
+        |> String.concat "\n"
 
     and formatLoadState (indenter: IIndentTransformer) (content: LoadState<Content>) =
         match content with
@@ -184,21 +191,31 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
 
             tail
             |> formatPart value indenter
-        | (External external)::tail ->
-            let ext =
-                $"%d{external.Index}. %s{external.Label}: %s{external.Path}"
-            let content = formatLoadState indenter external.Content
 
-            let value =
-                $"%s{ext}\n%s{content}"
-                |> modifyCurrent "External"
+    and formatExternals (current: string) (indenter: IIndentTransformer) (externals: External list) =
+        match externals with
+        | [] -> current
+        | head::tail ->
+            let ind = indenter.Indent 1
+            let opn = "External {" |> indenter.Transform
+            let index = $"Index: %d{head.Index}" |> ind.Transform
+            let path = $"Path: %A{head.Path}" |> ind.Transform
+            let label = $"Label: %A{head.Label}" |> ind.Transform
+            let content =
+                head.Content
+                |> formatLoadState ind
+            let cls = "}" |> indenter.Transform
+
+            let result =
+                [opn; index; path; label; content; cls]
+                |> String.concat "\n"
 
             tail
-            |> formatPart value indenter
+            |> formatExternals (result |> addTo current "\n") indenter
 
-    let formatTree indenter (tree: Tree) =
+    let formatTree (indenter: IIndentTransformer) (tree: Tree) =
         match tree with
-        | Empty -> "Empty"
+        | Empty -> "Empty" |> indenter.Transform
         | Content content -> formatContent indenter content
 
     maybeContent

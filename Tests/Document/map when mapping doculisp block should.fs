@@ -76,7 +76,7 @@ let ``map a real markdown document`` =
     feature.Test(
         Setup (fun reporter ->
             try
-                let markdown = openMarkdown ()
+                let markdown = openMarkdownFile ()
 
                 Ok (markdown, reporter)
             with

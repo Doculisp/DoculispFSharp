@@ -110,7 +110,7 @@ let ``parse a real file`` =
     feature.Test (
         Setup (fun reporter ->
             try
-                let markdown = openMarkdown ()
+                let markdown = openMarkdownFile ()
 
                 Ok (markdown, reporter)
             with

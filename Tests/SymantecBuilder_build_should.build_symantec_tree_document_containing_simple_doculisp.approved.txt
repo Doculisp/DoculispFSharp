@@ -1,0 +1,11 @@
+﻿Ok (
+	Title: "My document"
+	Subtitle: "None"
+	Link: "#my_document"
+	Table of Contents: NoTable
+	Externals: None
+	Parts: [
+		Text
+	]
+
+)
