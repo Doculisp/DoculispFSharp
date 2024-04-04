@@ -43,7 +43,7 @@
         },
         {
             "name": "pull",
-            "command": "gittey test && git pull && gittey check"
+            "command": "gittey commit && git pull && gittey check"
         }
     ],
     "collaborators": []
