@@ -162,10 +162,11 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
         [title; subtitle; link; toc; external; parts]
         |> String.concat "\n"
 
-    and formatLoadState (indenter: IIndentTransformer) (content: LoadState<Content>) =
+    and formatLoadState (indenter: IIndentTransformer) (content: LoadState<Tree>) =
         match content with
         | Waiting -> "Waiting for Content..." |> indenter.Transform
-        | Loaded content -> formatContent indenter content
+        | Loaded Empty -> "Empty" |> indenter.Transform
+        | Loaded (Content content) -> formatContent indenter content
 
     and formatPart (current: string) (indenter: IIndentTransformer) (parts: Part list) =
         let modifyCurrent (heading: string) (text: string) =
@@ -183,7 +184,7 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
             tail
             |> formatPart value indenter
         | (Heading heading)::tail ->
-            let pre = "".PadLeft (heading.Depth, '#')
+            let pre = "".PadLeft (heading.Depth + 1, '#')
             let value = $"%s{pre} %s{heading.Value}" |> modifyCurrent "Heading"
 
             tail

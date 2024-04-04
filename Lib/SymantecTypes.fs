@@ -27,27 +27,37 @@ type LoadState<'a> =
     | Waiting
     | Loaded of 'a
     
-type External =
+and External =
     {
         Path: string
         Label: string
-        Content: LoadState<Content>
+        Content: LoadState<Tree>
         Index: int
     }
     member this.Title with get () =
         match this.Content with
-        | Waiting -> ""
-        | Loaded content -> content.Title
+        | Waiting
+        | Loaded Empty -> ""
+        | Loaded (Content content) ->
+            content.Title
         
     member this.Link with get () =
         match this.Content with
-        | Waiting -> ""
-        | Loaded content -> content.Link
+        | Waiting
+        | Loaded Empty -> ""
+        | Loaded (Content content) ->
+            content.Link
 
     member this.IsLoaded with get () =
         match this.Content with
         | Waiting -> false
         | Loaded _ -> true
+
+    member this.HasContent with get () =
+        match this.Content with
+        | Waiting
+        | Loaded Empty -> false
+        | _ -> true
         
     member this.TableInfo with get () =
         {
@@ -80,6 +90,6 @@ and Content =
         this.Externals
         |> List.map _.TableInfo
 
-type Tree =
+and Tree =
     | Empty
     | Content of Content
