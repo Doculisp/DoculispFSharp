@@ -4,8 +4,11 @@
 	Link: "#my_document"
 	Table of Contents: NoTable
 	Externals: None
-	Parts: [
-		Text
-	]
+	Parts:
 
+		Markdown (
+		 ## A hardcoded heading
+		
+		with some text
+		)
 )
