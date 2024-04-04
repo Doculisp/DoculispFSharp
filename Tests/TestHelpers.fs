@@ -9,6 +9,7 @@ open Doculisp.Lib
 open Doculisp.Lib.DocumentTypes
 open Doculisp.Lib.TokenTypes
 open Doculisp.Lib.SymantecTypes
+open Doculisp.Lib.TextHelpers
 
 let reporter =
     [
@@ -44,12 +45,6 @@ let openMarkdownFile () =
         reader.ReadToEnd ()
 
     markdown
-
-let private addTo (current:string) (join: string) (follow: string) =
-        if 0 < current.Length then
-            $"%s{current}%s{join}%s{follow}"
-        else
-            $"%s{follow}"
 
 let formatMaybe (fn: IIndentTransformer -> 'a -> string) (value: Result<'a, string>) =
     match value with
@@ -151,10 +146,12 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
         let parts =
             let parts : string =
                 if 0 < content.Parts.Length then
-                    content.Parts |> formatPart "\n" (indenter.Indent 1)
+                    content.Parts |> formatPart "" (indenter.Indent 1)
                 else " None"
-            let p = "Parts:" |> indenter.Transform
-            $"%s{p}%s{parts}"
+            let p = "Parts: [" |> indenter.Transform
+            let c = "]" |> indenter.Transform
+            [p; parts; c]
+            |> String.concat "\n"
 
         let external =
             if 0 < content.Externals.Length then
@@ -171,10 +168,10 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
         | Loaded content -> formatContent indenter content
 
     and formatPart (current: string) (indenter: IIndentTransformer) (parts: Part list) =
-        let modifyCurrent heading text =
+        let modifyCurrent (heading: string) (text: string) =
             let opn = $"%s{heading} (" |> indenter.Transform
             let cls = ")" |> indenter.Transform
-            let value = text |> indenter.Transform
+            let value = text |> (indenter.Indent 1).Transform
 
             $"%s{opn}\n%s{value}\n%s{cls}" |> addTo current "\n"
 
@@ -197,14 +194,14 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
         | [] -> current
         | head::tail ->
             let ind = indenter.Indent 1
-            let opn = "External {" |> indenter.Transform
+            let opn = "Externals [" |> indenter.Transform
             let index = $"Index: %d{head.Index}" |> ind.Transform
             let path = $"Path: %A{head.Path}" |> ind.Transform
             let label = $"Label: %A{head.Label}" |> ind.Transform
             let content =
                 head.Content
                 |> formatLoadState ind
-            let cls = "}" |> indenter.Transform
+            let cls = "]" |> indenter.Transform
 
             let result =
                 [opn; index; path; label; content; cls]

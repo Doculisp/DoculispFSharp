@@ -72,7 +72,7 @@ let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char 
             tail
             |> map linePtr (charPtr + ln.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{ln}"
         | IsMultiline (ln, tail), Some st ->
-            Ok (TextMap { Value = $"%s{current}%s{ln}"; Coordinate = st }, linePtr, charPtr + ln.Length, tail)
+            Ok (TextMap { Value = $"%s{current}%s{ln}".Trim (); Coordinate = st }, linePtr, charPtr + ln.Length, tail)
         | IsEscaped '`' (esc, tail), _ ->
             tail
             |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"

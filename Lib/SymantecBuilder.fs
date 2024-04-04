@@ -3,6 +3,7 @@
 open Doculisp.Lib
 open Doculisp.Lib.TokenTypes
 open Doculisp.Lib.SymantecTypes
+open Doculisp.Lib.TextHelpers
 
 let toLinkString (value: string) =
     $"#%s{value.ToLower().Replace(' ', '_')}"
@@ -12,14 +13,14 @@ let private ToSafeLinkString (value: string option) (defaultValue: string) =
     | Some v -> v
     | _ -> defaultValue
 
-let private getHeadingInfo { Value = value; Coordinate = c } =
+let private getHeadingDepth { Value = value; Coordinate = c } =
     let rec getHeading (depth: int) (value: char list) =
         match value with
-        | [] -> Error $"Heading at %s{c.ToString ()} has no text."
+        | [] -> Ok depth
         | '#'::tail ->
             tail
             |> getHeading (depth + 1)
-        | _ -> (System.String.Join ("", value), depth) |> Ok
+        | _ -> Error $"Heading at %s{c.ToString ()} is malformed."
 
     value
     |> List.ofSeq
@@ -165,7 +166,7 @@ let private getSectionMetaBlock (tokens: Token list) =
             match result with
             | Ok (title, subtitle, link, externals, rest) ->
                 match title with
-                | None -> Error $"Section meta at %s{c.ToString ()} does not have a title"
+                | None -> Error $"Doculisp section-meta block at %s{c.ToString ()} does not have a title block."
                 | Some value ->
                     Ok (
                         true,
@@ -206,7 +207,7 @@ let private getSectionMetaBlock (tokens: Token list) =
             | Error errorValue -> Error errorValue
             | Ok (found, content, rest) ->
                 (found, content
-                |> Content, tail)
+                |> Content, (Lisp rest)::tail)
                 |> Ok
         | _ -> (false, Empty, tokens) |> Ok
 
@@ -219,8 +220,10 @@ let private getMarkdown (tokens: Token list) =
             match values with
             | [] -> { Value = current; Coordinate = st } |> Markdown
             | { Value = text; Coordinate = _ }::tail ->
+                let v = text |> addTo current " "
+
                 tail
-                |> getMarkdown st $"%s{current} %s{text}"
+                |> getMarkdown st v
 
         let st = values.Head |> _.Coordinate
         values
@@ -249,7 +252,7 @@ let private getMarkdown (tokens: Token list) =
     tokens
     |> getMarkdown []
 
-let private getContentLocation (tokens: LispToken list) =
+let private getContentLocation (hasExternals: bool) (tokens: LispToken list) =
     let getToc (tokens: LispToken list) =
         match tokens with
         | (Open { Value = "toc"; Coordinate = c })::tail ->
@@ -279,32 +282,41 @@ let private getContentLocation (tokens: LispToken list) =
 
             match toc with
             | Error errorValue -> Error errorValue
-            | Ok resultValue -> (ContentPlaceHolder c, resultValue, rest) |> Ok
+            | Ok resultValue ->
+                if hasExternals then
+                    (ContentPlaceHolder c, resultValue, rest) |> Ok
+                else
+                    Error $"Doculisp content block at %s{c.ToString ()} does not have any external content in section-meta."
 
 let getHeading (tokens: LispToken list) =
     match tokens with
     | (Open ({ Value = value; Coordinate = c } as heading))::tail when value.StartsWith "#" ->
-        let result =
-            heading |> getHeadingInfo
+        let depthMaybe =
+            heading |> getHeadingDepth
 
-        match result with
+        match depthMaybe with
         | Error errorValue -> Error errorValue
-        | Ok (text, depth) ->
-            ({
-                Depth = depth
-                Value = text
-                Coordinate = c
-            }
-            |> Heading, tail |> advanceToClose)
-            |> Ok
+        | Ok depth ->
+            let textMaybe, rest = tail |> getParameter
 
-let getLispParts (toc: TableOfContentsDefinition option) (lisps: LispToken list) =
+            match textMaybe with
+            | None -> Error $"Heading at %s{c.ToString ()} does not have text."
+            | Some text ->
+                ({
+                    Depth = depth
+                    Value = text
+                    Coordinate = c
+                }
+                |> Heading, rest |> advanceToClose)
+                |> Ok
+
+let getLispParts (hasExternals: bool) (toc: TableOfContentsDefinition option) (lisps: LispToken list) =
     let rec getParts (acc: Part list) (toc: TableOfContentsDefinition option) (lisps: LispToken list) =
         match lisps, toc with
         | [], _ -> (acc |> List.sortBy _.Coordinate, toc) |> Ok
         | (Open { Value = "content"; Coordinate = _ })::_, None ->
             let result =
-                lisps |> getContentLocation
+                lisps |> getContentLocation hasExternals
 
             match result with
             | Error errorValue -> Error errorValue
@@ -338,7 +350,7 @@ let getLispParts (toc: TableOfContentsDefinition option) (lisps: LispToken list)
     lisps
     |> getParts [] toc
 
-let private getParts (tokens: Token list) =
+let private getParts (hasSection: bool) (hasExternals: bool) (tokens: Token list) =
     let rec getParts (acc: Part list) (toc: TableOfContentsDefinition option) (tokens: Token list) =
         match tokens with
         | [] -> (acc |> List.sortBy _.Coordinate, toc) |> Ok
@@ -348,15 +360,17 @@ let private getParts (tokens: Token list) =
 
             tail
             |> getParts ([md; acc] |> List.concat) toc
-        | (Lisp lisps)::tail ->
+        | (Lisp lisps)::tail when hasSection ->
             let result =
-                lisps |> getLispParts toc
+                lisps |> getLispParts hasExternals toc
 
             match result with
             | Error errorValue -> Error errorValue
             | Ok (parts, nToc) ->
                 tail
                 |> getParts ([parts; acc] |> List.concat) nToc
+        | (Lisp (lisp::tail))::_ ->
+            Error $"Doculisp block at %s{lisp.Coordinate.ToString ()} appears before section-meta block."
 
     tokens
     |> getParts [] None
@@ -367,9 +381,28 @@ let private buildTree (tokens: Token list) =
 
     match section with
     | Error errorValue -> Error errorValue
-    | Ok (_, Empty, _) -> Empty |> Ok
-    | Ok (_found, Content content, tail) ->
-        let result = tail |> getParts
+    | Ok (_, Empty, tail) ->
+        let partsMaybe =
+            tail
+            |> getParts false false
+
+        match partsMaybe with
+        | Error errorValue -> Error errorValue
+        | Ok (parts, _) ->
+            {
+                Title = ""
+                Subtitle = None
+                Link = ""
+                Table = NoTable
+                Coordinate = { Line = -1; Char = -1 }
+                Parts = parts
+                Externals = []
+            }
+            |> Content
+            |> Ok
+
+    | Ok (found, Content content, tail) ->
+        let result = tail |> getParts found (0 < content.Externals.Length)
 
         match result with
         | Error errorValue -> Error errorValue

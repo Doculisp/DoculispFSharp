@@ -21,3 +21,9 @@ let (|IsEscaped|_|) value = function
     | '\\'::c::tail when c = value ->
         Some ($"\\%c{c}", tail)
     | _ -> None
+
+let addTo (current:string) (join: string) (follow: string) =
+        if 0 < current.Length then
+            $"%s{current}%s{join}%s{follow}"
+        else
+            $"%s{follow}"

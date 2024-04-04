@@ -10,7 +10,6 @@ let private feature = Arrow.NewFeature (
     TestTags [
         Category "Document"
         Category "Text"
-        Only
     ],
     setupApprovals
 )
@@ -80,30 +79,51 @@ let ``build symantec tree for real document`` =
     )
 
 let ``error for document that does not contain section-meta but contains doculisp`` =
-    feature.Test (fun reporter env ->
-        "Some text\n<!-- (dl (# My Heading)) -->"
-        |> Document.map
-        |> Tokenizer.parse
-        |> SymantecBuilder.build
-        |> Should.BeError "Doculisp block at (2, 10) appears before section-meta block."
+    feature.Test (
+        TestBody (fun reporter env ->
+            "Some text\n<!-- (dl (# My Heading)) -->"
+            |> Document.map
+            |> Tokenizer.parse
+            |> SymantecBuilder.build
+            |> formatSymantecTree
+            |> Should.MeetStandard reporter env.TestInfo
+        )
     )
 
 let ``error for document that has a section-meta block without a title`` =
-    feature.Test (fun reporter env ->
-        "<!-- (dl (section-meta (external (section ./section.md)))) -->"
-        |> Document.map
-        |> Tokenizer.parse
-        |> SymantecBuilder.build
-        |> Should.BeError "Doculisp section-meta block at (1, 10) does not have title block."
+    feature.Test (
+        TestBody (fun reporter env ->
+            "<!-- (dl (section-meta (external (section ./section.md)))) -->"
+            |> Document.map
+            |> Tokenizer.parse
+            |> SymantecBuilder.build
+            |> formatSymantecTree
+            |> Should.MeetStandard reporter env.TestInfo
+        )
     )
 
 let ``error for document that has 2 section-metas block`` =
-    feature.Test (fun reporter env ->
+    feature.Test (
+        TestBody (fun reporter env ->
         "<!-- (dl\n\t(section-meta (title My Title))\n\t(section-meta (title My more awesome title))\n) -->"
-        |> Document.map
-        |> Tokenizer.parse
-        |> SymantecBuilder.build
-        |> Should.BeError "Doculisp section-meta block at (3, 2) is a duplicate section-meta block."
+            |> Document.map
+            |> Tokenizer.parse
+            |> SymantecBuilder.build
+            |> formatSymantecTree
+            |> Should.MeetStandard reporter env.TestInfo
+        )
+    )
+
+let ``error for document that has 2 section-metas block in two different dl blocks`` =
+    feature.Test (
+        TestBody (fun reporter env ->
+        "<!-- (dl\n\t(section-meta (title My Title))) -->\n# Hello\n<!-- (dl (section-meta (title My more awesome title))) -->"
+            |> Document.map
+            |> Tokenizer.parse
+            |> SymantecBuilder.build
+            |> formatSymantecTree
+            |> Should.MeetStandard reporter env.TestInfo
+        )
     )
 
 let ``error for document that has a content block and no externals`` =
@@ -112,7 +132,8 @@ let ``error for document that has a content block and no externals`` =
         |> Document.map
         |> Tokenizer.parse
         |> SymantecBuilder.build
-        |> Should.BeError "Doculisp content block at (3, 2) does not have any external content in section-meta."
+        |> formatSymantecTree
+        |> Should.MeetStandard reporter env.TestInfo
     )
 
 let ``Test Cases`` =

@@ -4,11 +4,11 @@
 	Link: "#my_document"
 	Table of Contents: NoTable
 	Externals: None
-	Parts:
-
+	Parts: [
 		Markdown (
-		 ## A hardcoded heading
-		
-		with some text
+			## A hardcoded heading
+			
+			with some text
 		)
+	]
 )
