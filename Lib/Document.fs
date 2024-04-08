@@ -238,7 +238,6 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
 
     endResult
     
-
 let map (document: char seq) =
     let rec map (linePtr: int) (charPtr: int) (acc: DocumentMap list) (document: char list) =
         match document with
