@@ -238,7 +238,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
 
     endResult
     
-let map (document: char seq) =
+let private mapMain (document: char seq) =
     let rec map (linePtr: int) (charPtr: int) (acc: DocumentMap list) (document: char list) =
         match document with
         | [] ->
@@ -275,3 +275,7 @@ let map (document: char seq) =
     document
     |> List.ofSeq
     |> map 0 0 []
+
+let map (document: Result<char seq, string>) =
+    document
+    |> combine mapMain

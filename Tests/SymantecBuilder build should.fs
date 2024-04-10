@@ -28,6 +28,7 @@ let ``build symantec tree for text`` =
     feature.Test (
         TestBody(fun reporter env ->
             "Hello world"
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> SymantecBuilder.build
@@ -50,6 +51,7 @@ let ``build symantec tree document containing simple doculisp`` =
 ## A hardcoded heading
 
 with some text"
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> SymantecBuilder.build
@@ -70,6 +72,7 @@ let ``build symantec tree for real document`` =
         ),
         TestBody (fun (markdown, reporter) env ->
             markdown
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> SymantecBuilder.build
@@ -82,6 +85,7 @@ let ``error for document that does not contain section-meta but contains doculis
     feature.Test (
         TestBody (fun reporter env ->
             "Some text\n<!-- (dl (# My Heading)) -->"
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> SymantecBuilder.build
@@ -94,6 +98,7 @@ let ``error for document that has a section-meta block without a title`` =
     feature.Test (
         TestBody (fun reporter env ->
             "<!-- (dl (section-meta (external (section ./section.md)))) -->"
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> SymantecBuilder.build
@@ -106,6 +111,7 @@ let ``error for document that has 2 section-metas block`` =
     feature.Test (
         TestBody (fun reporter env ->
         "<!-- (dl\n\t(section-meta (title My Title))\n\t(section-meta (title My more awesome title))\n) -->"
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> SymantecBuilder.build
@@ -118,6 +124,7 @@ let ``error for document that has 2 section-metas block in two different dl bloc
     feature.Test (
         TestBody (fun reporter env ->
         "<!-- (dl\n\t(section-meta (title My Title))) -->\n# Hello\n<!-- (dl (section-meta (title My more awesome title))) -->"
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> SymantecBuilder.build
@@ -129,6 +136,7 @@ let ``error for document that has 2 section-metas block in two different dl bloc
 let ``error for document that has a content block and no externals`` =
     feature.Test (fun reporter env ->
         "<!-- (dl\n\t(section-meta (title My Title))\n\t(content)\n) -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> SymantecBuilder.build

@@ -218,3 +218,8 @@ let formatSymantecTree (maybeContent: Result<Tree, string>) =
 
     maybeContent
     |> formatMaybe formatTree
+
+let stringToMaybeCharSeq (text: string) =
+    text
+    |> Ok
+    |> stringMaybeToSeqMaybe

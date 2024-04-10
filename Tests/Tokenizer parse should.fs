@@ -32,6 +32,7 @@ let ``error if given an error`` =
 let ``parse text`` =
     feature.Test (fun reporters env ->
         "Hello Test"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> formatTokens
@@ -42,6 +43,7 @@ let ``parse multiline text`` =
     feature.Test (fun reporters env ->
         "<!-- --> Hello Test
 this is a case"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> formatTokens
@@ -51,6 +53,7 @@ this is a case"
 let ``parse single line Doculisp`` =
     feature.Test (fun reporter environment ->
         "<!-- (dl (content)) -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> formatTokens
@@ -60,6 +63,7 @@ let ``parse single line Doculisp`` =
 let ``parse single line Doculisp with parameter`` =
     feature.Test (fun reporter environment ->
         "<!-- (dl (# My Heading)) -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> formatTokens
@@ -69,6 +73,7 @@ let ``parse single line Doculisp with parameter`` =
 let ``parse single line Doculisp with parameter that contain parentheses`` =
     feature.Test (fun reporter environment ->
         "<!-- (dl (# My \(Heading\))) -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> formatTokens
@@ -87,6 +92,7 @@ let ``parse multiline Doculisp with parameter that contain parentheses`` =
 
 # Heading
 "
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> formatTokens
@@ -100,6 +106,7 @@ let ``error if missing atom`` =
     ( my parameter)
 )
 -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Tokenizer.parse
         |> formatTokens
@@ -118,6 +125,7 @@ let ``parse a real file`` =
         ),
         TestBody (fun (markdown, reporter) env ->
             markdown
+            |> stringToMaybeCharSeq
             |> Document.map
             |> Tokenizer.parse
             |> formatTokens

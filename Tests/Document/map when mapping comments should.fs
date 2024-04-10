@@ -18,6 +18,7 @@ let private feature = Arrow.NewFeature (
 let ``ignore a comment`` =
     feature.Test (fun _ ->
         "<!-- Some piffy comment -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Should.BeOk []
     )
@@ -25,6 +26,7 @@ let ``ignore a comment`` =
 let ``ignore a comment with extra whitespace`` =
     feature.Test (fun _ ->
         "    <!-- Some piffy comment -->    "
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Should.BeOk []
     )
@@ -32,6 +34,7 @@ let ``ignore a comment with extra whitespace`` =
 let ``ignore a comment surrounded with text`` =
     feature.Test (fun reporters env ->
         "My cool <!-- Some piffy comment -->   world"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -42,6 +45,7 @@ let ``ignore a multiline comment surrounded with text`` =
         "My cool
 <!-- Some piffy comment -->
 world"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -51,6 +55,7 @@ let ``error when the comment block is unclosed`` =
     feature.Test (fun reporters env ->
         "My awesome text
 to be hold <!-- not really"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo

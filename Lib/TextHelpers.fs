@@ -27,3 +27,11 @@ let addTo (current:string) (join: string) (follow: string) =
             $"%s{current}%s{join}%s{follow}"
         else
             $"%s{follow}"
+
+let stringMaybeToSeqMaybe (text: Result<string, string>) =
+    match text with
+    | Error errorValue -> Error errorValue
+    | Ok resultValue ->
+        resultValue.ToCharArray ()
+        |> Array.toSeq
+        |> Ok

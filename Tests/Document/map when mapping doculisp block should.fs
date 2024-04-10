@@ -19,6 +19,7 @@ let private feature = Arrow.NewFeature (
 let ``map a doculisp block`` =
     feature.Test (fun reporters env ->
         "<!-- (dl (# My Heading)) -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -31,6 +32,7 @@ My heading is the best
       (dl (# My New Heading))
 Just look at its dynamic-ness
 -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -45,6 +47,7 @@ My heading is the best
      )
 Just look at its dynamic-ness
 -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -59,6 +62,7 @@ My heading is the best
      )
 Just look at its dynamic-ness
 -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -67,6 +71,7 @@ Just look at its dynamic-ness
 let ``error if the lisp does not properly close`` =
     feature.Test (fun reporters env ->
         "<!-- (dl (# My New Heading) -->"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -84,6 +89,7 @@ let ``map a real markdown document`` =
         ),
         TestBody (fun (markdown, reporter) env ->
             markdown
+            |> stringToMaybeCharSeq
             |> Document.map
             |> formatMap
             |> Should.MeetStandard reporter env.TestInfo

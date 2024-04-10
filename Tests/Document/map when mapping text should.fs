@@ -18,6 +18,7 @@ let private feature = Arrow.NewFeature (
 let ``map an empty document`` =
     feature.Test (fun _ ->
         ""
+        |> stringToMaybeCharSeq
         |> Document.map
         |> Should.BeOk []
     )
@@ -25,6 +26,7 @@ let ``map an empty document`` =
 let ``map "Hello" as text`` =
     feature.Test (fun reporters env ->
         "Hello"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -33,6 +35,7 @@ let ``map "Hello" as text`` =
 let ``map "Good bye" as text`` =
     feature.Test (fun reporters env ->
         "Good Bye"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -41,6 +44,7 @@ let ``map "Good bye" as text`` =
 let ``map text followed by spaces`` =
     feature.Test (fun reporters env ->
         "Good Bye   "
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -49,6 +53,7 @@ let ``map text followed by spaces`` =
 let ``map text surrounded by spaces`` =
     feature.Test (fun reporters env ->
         "   Doculisp   "
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -57,6 +62,7 @@ let ``map text surrounded by spaces`` =
 let ``map text surrounded by spaces and preceded by new lines`` =
     feature.Test (fun reporters env ->
         "\r\n\r\n\r\n\r\n   After Lines   "
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
@@ -65,6 +71,7 @@ let ``map text surrounded by spaces and preceded by new lines`` =
 let ``map text that includes new lines`` =
     feature.Test (fun reporters env ->
         "# A document\r\n\r\nAbout something"
+        |> stringToMaybeCharSeq
         |> Document.map
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
