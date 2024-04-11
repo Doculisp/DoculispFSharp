@@ -3,13 +3,13 @@
     (section-meta
         (title Doculisp)
         (external
-            (section ./structure.md)
-            (section ./doculisp.md)
-            (section ./section-meta.md)
-            (section ./content.md)
-            (section ./headings.md)
-            (section ./comment.md)
-            (section ./keywords.md)
+            (Section ./structure.md)
+            (Section ./doculisp.md)
+            (Section ./section-meta.md)
+            (Section ./content.md)
+            (Section ./headings.md)
+            (Section ./comment.md)
+            (Section ./keywords.md)
         )
     )
 

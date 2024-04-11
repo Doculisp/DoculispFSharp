@@ -29,13 +29,13 @@ let private processToc (builder: Builder) (content: Content) =
     | Unlabeled ->
         content.Externals
         |> List.iter (fun external ->
-            $"[%s{external.Title}](%s{external.Link})"
+            $"[%s{external.Title}](%s{external.Link})\n"
             |> builder.Append
         )
     | Labeled ->
         content.Externals
         |> List.iter (fun external ->
-            $"[%s{external.Label}: %s{external.Title}](%s{external.Link})"
+            $"[%s{external.Label}: %s{external.Title}](%s{external.Link})\n"
             |> builder.Append
         )
     | Numbered ->
@@ -126,7 +126,7 @@ and private processTree (builder: Builder) (depth: int) (tree: Tree) =
         |> processContent builder depth
 
         content.Parts
-        |> processParts content builder 0
+        |> processParts content builder depth
 
 let processBuildResult (writer: TextWriter) (maybeTree: Result<Tree, string>) =
     let builder = writer |> Builder

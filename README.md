@@ -2,13 +2,13 @@
 
 # Doculisp #
 
-1. [section: Basic Structure](#basic_structure)
-2. [section: Doculisp Master Block](#doculisp_master_block)
-3. [section: Section Meta Block](#section_meta_block)
-4. [section: Content Block](#content_block)
-5. [section: Dynamic Headings](#dynamic_headings)
-6. [section: Comment Block](#comment_block)
-7. [section: Key Atoms by Depth](#key_atoms_by_depth)
+1. [Section: Basic Structure](#basic_structure)
+2. [Section: Doculisp Master Block](#doculisp_master_block)
+3. [Section: Section Meta Block](#section_meta_block)
+4. [Section: Content Block](#content_block)
+5. [Section: Dynamic Headings](#dynamic_headings)
+6. [Section: Comment Block](#comment_block)
+7. [Section: Key Atoms by Depth](#key_atoms_by_depth)
 
 ## Basic Structure ##
 
@@ -30,11 +30,11 @@ Example
 
 The first block is the `dl` block. In it `dl` is the atom. It contains the `section-meta` sub-block.  That block has the atom `section-meta` followed by a further sub block. The last sub block is the `title` sub block. In it `title` is the atom and `Basic Structure` is the parameter.
 
-## Parameter ##
+### Parameter ###
 
 A parameter is a string of characters that contains no line advancement (`\r` or `\n`) character and no parentheses (unless escaped). A parameter has a max length of 255 characters.
 
-## Visual Explanation ##
+### Visual Explanation ###
 
 ```doculisp
 (atom)
@@ -81,11 +81,11 @@ Example
 )
 ```
 
-## Title (required) ##
+### Title (required) ###
 
 This is the only sub block required for the `section-meta` block. The title is followed by a title that ends at a `)`. Every thing following the white space after the word title and until a new line or a close parenthesis is the title.
 
-## Link ##
+### Link ###
 
 This is the first optional sub block for the `section-meta` block. The link allows you to take over the link to use in the table of contents. Its main purpose is to handle characters in the title that markdown does not include in its section headers. This does not change the section link, but lets you specify a different link to use instead.
 
@@ -98,11 +98,11 @@ Example
 )
 ```
 
-## Subtitle ##
+### Subtitle ###
 
 Subtitle creates a heading that is two levels of heading less then the title directly beneath the title.
 
-## External ##
+### External ###
 
 This allows you to break each section up into sub-sections that are composed in seperate files. This allows you to limit the scope of work in each file making it easier to find where you need to edit and focus on a single idea.
 
@@ -118,7 +118,7 @@ Example
 )
 ```
 
-### Sub-Sections ###
+#### Sub-Sections ####
 
 The `external` block is composed of sub-section blocks. These blocks are different then other doculisp blocks. They are custom named blocks. Which means the name of each block is decided by the programmer the same way a varible name is. The format of these blocks is `(` followed by a name followed by whitespace. After the white space is the file path that leads to the document containing the information on how to build the sub-section. Followed again by an optional new line and whitespace. Ending in `)`.
 
@@ -152,7 +152,7 @@ This will create a subsection called `sub section` that is built using the file 
 
 This will create a subsection called `section` that is built using the file `./two.md`.
 
-## Exception to the Rule ##
+### Exception to the Rule ###
 
 Comment block breaks this rule slightly. The astrict character is a special character that cause all atoms that start with to be treated as a comment, and all parameters and sub blocks to be ignored.
 
@@ -160,12 +160,13 @@ Comment block breaks this rule slightly. The astrict character is a special char
 
 The content block signifies where to build the document from the external documents. This block has only one optional subblock.
 
-## Table of Contents ##
+### Table of Contents ###
 
 The only subblock to the content block is the table of contents. This will cause a linked table of contents to appear for the section at its location.
 
 The structure of the table of contents is `(toc)` there is an optional parameter that can have one of the following values:
 
+* no-table
 * unlabeled
 * labeled
 * numbered
@@ -287,7 +288,7 @@ xample:
 -->
 ```
 
-## Nested Comments ##
+### Nested Comments ###
 
 In this example the `section-meta` and all its subblocks are commented out. However when you uncomment `section-meta` then the `external` block will be commented out. When you uncomment that block, then the `section ./comment.md` block will be commented out.
 

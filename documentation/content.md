@@ -14,6 +14,7 @@ The only subblock to the content block is the table of contents. This will cause
 
 The structure of the table of contents is `(toc)` there is an optional parameter that can have one of the following values:
 
+* no-table
 * unlabeled
 * labeled
 * numbered
