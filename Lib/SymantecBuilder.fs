@@ -6,7 +6,7 @@ open Doculisp.Lib.SymantecTypes
 open Doculisp.Lib.TextHelpers
 
 let toLinkString (value: string) =
-    $"#%s{value.ToLower().Replace(' ', '_')}"
+    $"#%s{value.ToLower().Replace(' ', '-')}"
 
 let private ToSafeLinkString (value: string option) (defaultValue: string) =
     match value with

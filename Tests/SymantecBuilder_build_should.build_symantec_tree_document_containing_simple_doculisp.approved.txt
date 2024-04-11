@@ -1,7 +1,7 @@
 ﻿Ok (
 	Title: "My document"
 	Subtitle: "None"
-	Link: "#my_document"
+	Link: "#my-document"
 	Table of Contents: NoTable
 	Externals: None
 	Parts: [
