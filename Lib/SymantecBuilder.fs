@@ -375,19 +375,19 @@ let private getParts (hasSection: bool) (hasExternals: bool) (tokens: Token list
     tokens
     |> getParts [] None
 
-let private buildTree (tokens: Token list) =
+let private buildTree (fileName: string) (tokens: Token list) =
     let section =
         tokens |> getSectionMetaBlock
 
     match section with
-    | Error errorValue -> Error errorValue
+    | Error errorValue -> Error $"%s{fileName}\n%s{errorValue}"
     | Ok (_, Empty, tail) ->
         let partsMaybe =
             tail
             |> getParts false false
 
         match partsMaybe with
-        | Error errorValue -> Error errorValue
+        | Error errorValue -> Error $"%s{fileName}\n%s{errorValue}"
         | Ok (parts, _) ->
             if 0 < parts.Length then
                 {
@@ -422,5 +422,6 @@ let private buildTree (tokens: Token list) =
             |> Content
             |> Ok
 
-let build (document: Result<Token list, string>) =
-    combine buildTree document
+let build (fileName: string) (document: Result<Token list, string>) =
+    document
+    |> combine (buildTree fileName)

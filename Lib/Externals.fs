@@ -22,7 +22,7 @@ let rec private loadExternals (externals: External list) =
                 |> stringMaybeToSeqMaybe
                 |> Document.map external.Path
                 |> Tokenizer.parse external.Path
-                |> SymantecBuilder.build
+                |> SymantecBuilder.build external.Path
                 |> load
 
             match sectionMaybe with

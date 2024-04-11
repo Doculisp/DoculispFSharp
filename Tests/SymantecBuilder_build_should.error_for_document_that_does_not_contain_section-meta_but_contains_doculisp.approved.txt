@@ -1,1 +1,2 @@
-﻿Error "Doculisp block at (2, 10) appears before section-meta block."
+﻿Error "./docs/readme.md
+Doculisp block at (2, 10) appears before section-meta block."

@@ -19,7 +19,7 @@ let ``build from empty tokens`` =
         TestBody(fun _ ->
             []
             |> Ok
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build "./docs/readme.md"
             |> Should.BeEqualTo (Ok Empty)
         )
     )
@@ -32,7 +32,7 @@ let ``build symantec tree for text`` =
             |> stringToMaybeCharSeq
             |> Document.map path
             |> Tokenizer.parse path
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build path
             |> formatSymantecTree
             |> Should.MeetStandard reporter env.TestInfo
         )
@@ -56,7 +56,7 @@ with some text"
             |> stringToMaybeCharSeq
             |> Document.map path
             |> Tokenizer.parse path
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build path
             |> formatSymantecTree
             |> Should.MeetStandard reporter env.TestInfo
         )
@@ -78,7 +78,7 @@ let ``build symantec tree for real document`` =
             |> stringToMaybeCharSeq
             |> Document.map path
             |> Tokenizer.parse path
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build path
             |> formatSymantecTree
             |> Should.MeetStandard reporter env.TestInfo
         )
@@ -92,7 +92,7 @@ let ``error for document that does not contain section-meta but contains doculis
             |> stringToMaybeCharSeq
             |> Document.map path
             |> Tokenizer.parse path
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build path
             |> formatSymantecTree
             |> Should.MeetStandard reporter env.TestInfo
         )
@@ -106,7 +106,7 @@ let ``error for document that has a section-meta block without a title`` =
             |> stringToMaybeCharSeq
             |> Document.map path
             |> Tokenizer.parse path
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build path
             |> formatSymantecTree
             |> Should.MeetStandard reporter env.TestInfo
         )
@@ -120,7 +120,7 @@ let ``error for document that has 2 section-metas block`` =
             |> stringToMaybeCharSeq
             |> Document.map path
             |> Tokenizer.parse path
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build path
             |> formatSymantecTree
             |> Should.MeetStandard reporter env.TestInfo
         )
@@ -134,7 +134,7 @@ let ``error for document that has 2 section-metas block in two different dl bloc
             |> stringToMaybeCharSeq
             |> Document.map path
             |> Tokenizer.parse path
-            |> SymantecBuilder.build
+            |> SymantecBuilder.build path
             |> formatSymantecTree
             |> Should.MeetStandard reporter env.TestInfo
         )
@@ -147,7 +147,7 @@ let ``error for document that has a content block and no externals`` =
         |> stringToMaybeCharSeq
         |> Document.map path
         |> Tokenizer.parse path
-        |> SymantecBuilder.build
+        |> SymantecBuilder.build path
         |> formatSymantecTree
         |> Should.MeetStandard reporter env.TestInfo
     )
