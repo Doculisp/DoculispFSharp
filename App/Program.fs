@@ -37,9 +37,19 @@ let main (parameters: string array) =
             let source = results.GetResult SourceFile
             let isTest = results.Contains Test
 
-            printf $"%s{source} --> %s{target}"
-            if isTest then printf " (TEST)"
-            printfn ""
+            let target =
+                let info =
+                    target
+                    |> FileInfo
+
+                info.FullName
+
+            let source =
+                let info =
+                    source
+                    |> FileInfo
+
+                info.FullName
 
             let currentDir =
                 System.Reflection.Assembly.GetEntryAssembly().Location
@@ -50,6 +60,10 @@ let main (parameters: string array) =
                 |> getDirectoryForFile
 
             try
+                printf $"%s{source} --> %s{target}"
+                if isTest then printf " (TEST)"
+                printfn ""
+
                 Directory.SetCurrentDirectory sourceDirectory
 
                 let buildResult =
