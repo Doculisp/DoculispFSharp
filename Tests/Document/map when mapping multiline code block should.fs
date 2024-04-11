@@ -23,7 +23,7 @@ var x = 2 + 2;
 ```"
         text
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/math.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -37,7 +37,7 @@ let ``map a multiline code block containing Doculisp code`` =
 ```"
         text
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/mydoc.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -53,7 +53,7 @@ let count = [ 1..100 ]
 This creates a list with numbers."
         text
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/readme.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -67,7 +67,7 @@ let ``map a multiline code block containing a multiline code block`` =
 ```"
         text
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_main.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -82,7 +82,7 @@ let count = [ 1..100 ]
 This creates a list with numbers."
         text
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/bob.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )

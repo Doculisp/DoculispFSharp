@@ -19,7 +19,7 @@ let ``ignore a comment`` =
     feature.Test (fun _ ->
         "<!-- Some piffy comment -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_main.md"
         |> Should.BeOk []
     )
 
@@ -27,7 +27,7 @@ let ``ignore a comment with extra whitespace`` =
     feature.Test (fun _ ->
         "    <!-- Some piffy comment -->    "
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_readme.md"
         |> Should.BeOk []
     )
 
@@ -35,7 +35,7 @@ let ``ignore a comment surrounded with text`` =
     feature.Test (fun reporters env ->
         "My cool <!-- Some piffy comment -->   world"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/readme.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -46,7 +46,7 @@ let ``ignore a multiline comment surrounded with text`` =
 <!-- Some piffy comment -->
 world"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/start.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -56,7 +56,7 @@ let ``error when the comment block is unclosed`` =
         "My awesome text
 to be hold <!-- not really"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/here.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )

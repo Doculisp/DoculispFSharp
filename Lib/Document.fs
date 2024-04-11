@@ -264,7 +264,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
 
     endResult
     
-let private mapMain (document: char seq) =
+let private mapMain (filename: string) (document: char seq) =
     let rec map (linePtr: int) (charPtr: int) (acc: DocumentMap list) (document: char list) =
         match document with
         | [] ->
@@ -286,7 +286,7 @@ let private mapMain (document: char seq) =
             | Ok (lisps, line, c, tail) ->
                 tail
                 |> map line c ([lisps; acc] |> List.concat)
-            | Error errorMessage -> Error errorMessage
+            | Error errorMessage -> Error $"%s{filename}\n%s{errorMessage}"
         | _ ->
             let result =
                 document
@@ -296,12 +296,12 @@ let private mapMain (document: char seq) =
             | Ok (mapped, line, c, tail) ->
                 tail
                 |> map line c (mapped::acc)
-            | Error errorMessage -> Error errorMessage
+            | Error errorMessage -> Error $"%s{filename}\n%s{errorMessage}"
         
     document
     |> List.ofSeq
     |> map 0 0 []
 
-let map (document: Result<char seq, string>) =
+let map (filename: string) (document: Result<char seq, string>) =
     document
-    |> combine mapMain
+    |> combine (mapMain filename)

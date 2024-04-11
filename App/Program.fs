@@ -70,12 +70,12 @@ let main (parameters: string array) =
             try
                 Directory.SetCurrentDirectory sourceDirectory
 
-                writer.WriteLine "<!-- Generated Document do not edit! -->"
+                writer.WriteLine "<!-- Generated Document do not edit! -->\n"
 
                 let buildResult =
                     source
                     |> getFile
-                    |> Document.map
+                    |> Document.map source
                     |> Tokenizer.parse
                     |> SymantecBuilder.build
                     |> Externals.load

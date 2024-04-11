@@ -20,7 +20,7 @@ let ``map an inline code block`` =
     feature.Test (fun reporters env ->
         "`var x = 13`"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/docs.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -29,7 +29,7 @@ let ``map an inline code block containing a html comment`` =
     feature.Test (fun reporters env ->
         "`<!-- My Comment -->`"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/map.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -38,7 +38,7 @@ let ``map an inline code block containing an unclosed html comment`` =
     feature.Test (fun reporters env ->
         "`<!-- My Comment`"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/readme.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -47,7 +47,7 @@ let ``map an inline code block containing an inline code block`` =
     feature.Test (fun reporters env ->
         "`\`var c = 'c'\``"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_main.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -57,7 +57,7 @@ let ``error if there is a new line before it closes`` =
         "example: `var name = \"Alpha\"
 `"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_readme.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -67,7 +67,7 @@ let ``error if there is no close to the block`` =
         "example:
 `var name = \"Alpha\""
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_doc.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -76,7 +76,7 @@ let ``not map an escaped back-tick`` =
     feature.Test (fun reporters env ->
         @"\`<!-- My Comment -->\`"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_start.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -85,7 +85,7 @@ let ``not map a commented out code block`` =
     feature.Test (fun _ ->
         "<!-- `let x = y |> doSomething` -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_here.md"
         |> Should.BeOk []
     )
 

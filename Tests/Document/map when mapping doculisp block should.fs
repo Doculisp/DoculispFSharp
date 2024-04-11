@@ -20,7 +20,7 @@ let ``map a doculisp block`` =
     feature.Test (fun reporters env ->
         "<!-- (dl (# My Heading)) -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/stun.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -33,7 +33,7 @@ My heading is the best
 Just look at its dynamic-ness
 -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map"./docs/_head.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -48,7 +48,7 @@ My heading is the best
 Just look at its dynamic-ness
 -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_main.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -63,7 +63,7 @@ My heading is the best
 Just look at its dynamic-ness
 -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_doc.md"
         |> formatMap
         |> Should.MeetStandard reporters env.TestInfo
     )
@@ -74,7 +74,7 @@ let ``error if the lisp does not properly close`` =
             fun reporters env ->
             "<!-- (dl (# My New Heading) -->"
             |> stringToMaybeCharSeq
-            |> Document.map
+            |> Document.map "./docs/here.md"
             |> formatMap
             |> Should.MeetStandard reporters env.TestInfo
         )
@@ -93,7 +93,7 @@ let ``map a real markdown document`` =
         TestBody (fun (markdown, reporter) env ->
             markdown
             |> stringToMaybeCharSeq
-            |> Document.map
+            |> Document.map "./docs/free.md"
             |> formatMap
             |> Should.MeetStandard reporter env.TestInfo
         )

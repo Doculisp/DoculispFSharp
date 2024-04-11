@@ -20,7 +20,7 @@ let rec private loadExternals (externals: External list) =
             let sectionMaybe =
                 file
                 |> stringMaybeToSeqMaybe
-                |> Document.map
+                |> Document.map external.Path
                 |> Tokenizer.parse
                 |> SymantecBuilder.build
                 |> load

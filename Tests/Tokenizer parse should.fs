@@ -33,7 +33,7 @@ let ``parse text`` =
     feature.Test (fun reporters env ->
         "Hello Test"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_main.md"
         |> Tokenizer.parse
         |> formatTokens
         |> Should.MeetStandard reporters env.TestInfo
@@ -44,7 +44,7 @@ let ``parse multiline text`` =
         "<!-- --> Hello Test
 this is a case"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_readme.md"
         |> Tokenizer.parse
         |> formatTokens
         |> Should.MeetStandard reporters env.TestInfo
@@ -54,7 +54,7 @@ let ``parse single line Doculisp`` =
     feature.Test (fun reporter environment ->
         "<!-- (dl (content)) -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_start.md"
         |> Tokenizer.parse
         |> formatTokens
         |> Should.MeetStandard reporter environment.TestInfo
@@ -64,7 +64,7 @@ let ``parse single line Doculisp with parameter`` =
     feature.Test (fun reporter environment ->
         "<!-- (dl (# My Heading)) -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/piffy.md"
         |> Tokenizer.parse
         |> formatTokens
         |> Should.MeetStandard reporter environment.TestInfo
@@ -74,7 +74,7 @@ let ``parse single line Doculisp with parameter that contain parentheses`` =
     feature.Test (fun reporter environment ->
         "<!-- (dl (# My \(Heading\))) -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/test.md"
         |> Tokenizer.parse
         |> formatTokens
         |> Should.MeetStandard reporter environment.TestInfo
@@ -93,7 +93,7 @@ let ``parse multiline Doculisp with parameter that contain parentheses`` =
 # Heading
 "
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_main.md"
         |> Tokenizer.parse
         |> formatTokens
         |> Should.MeetStandard reporter environment.TestInfo
@@ -107,7 +107,7 @@ let ``error if missing atom`` =
 )
 -->"
         |> stringToMaybeCharSeq
-        |> Document.map
+        |> Document.map "./docs/_doc.md"
         |> Tokenizer.parse
         |> formatTokens
         |> Should.MeetStandard reporter env.TestInfo
@@ -126,7 +126,7 @@ let ``parse a real file`` =
         TestBody (fun (markdown, reporter) env ->
             markdown
             |> stringToMaybeCharSeq
-            |> Document.map
+            |> Document.map "./docs/_readme.md"
             |> Tokenizer.parse
             |> formatTokens
             |> Should.MeetStandard reporter env.TestInfo
