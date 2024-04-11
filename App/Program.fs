@@ -37,6 +37,9 @@ let main (parameters: string array) =
             let source = results.GetResult SourceFile
             let isTest = results.Contains Test
 
+            printf $"%s{source} --> %s{target}"
+            if isTest then printf " (TEST)"
+            printfn ""
 
             let currentDir =
                 System.Reflection.Assembly.GetEntryAssembly().Location
