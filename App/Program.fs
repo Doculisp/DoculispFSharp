@@ -62,7 +62,7 @@ let main (parameters: string array) =
             try
                 printf $"%s{source} --> %s{target}"
                 if isTest then printf " (TEST)"
-                printfn ""
+                printfn "\n\n"
 
                 Directory.SetCurrentDirectory sourceDirectory
 
