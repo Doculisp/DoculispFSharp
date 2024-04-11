@@ -13,7 +13,7 @@ let private ToSafeLinkString (value: string option) (defaultValue: string) =
     | Some v -> v
     | _ -> defaultValue
 
-let private getHeadingDepth { Value = value; Coordinate = c } =
+let private getHeadingDepth { Value = value; Coordinate = c; FileName = _ } =
     let rec getHeading (depth: int) (value: char list) =
         match value with
         | [] -> Ok depth
@@ -215,10 +215,10 @@ let private getSectionMetaBlock (tokens: Token list) =
     |> getSectionMeta
 
 let private getMarkdown (tokens: Token list) =
-    let getMarkdownFromValues (values: Value list) =
+    let getMarkdownFromValues (filename: string) (values: Value list) =
         let rec getMarkdown (st: Coordinate) (current: string) (values: Value list) =
             match values with
-            | [] -> { Value = current; Coordinate = st } |> Markdown
+            | [] -> { Value = current; Coordinate = st; FileName = filename } |> Markdown
             | { Value = text; Coordinate = _ }::tail ->
                 let v = text |> addTo current " "
 
@@ -229,22 +229,22 @@ let private getMarkdown (tokens: Token list) =
         values
         |> getMarkdown st ""
 
-    let rec getAllOnSameLine (line: int) (acc: Value list) (tokens: Token list) =
+    let rec getAllOnSameLine (filename: string) (line: int) (acc: Value list) (tokens: Token list) =
         match tokens with
-        | [] -> (acc |> getMarkdownFromValues), tokens
+        | [] -> (acc |> getMarkdownFromValues filename), tokens
         | (Text text)::tail when line = text.Coordinate.Line ->
             tail
-            |> getAllOnSameLine line (text::acc)
-        | _ -> (acc |> getMarkdownFromValues), tokens
+            |> getAllOnSameLine filename line (text::acc)
+        | _ -> (acc |> getMarkdownFromValues filename), tokens
 
     let rec getMarkdown (acc: Part list) (tokens: Token list) =
         match tokens with
         | []
         | (Lisp _)::_ -> (acc |> List.sortBy _.Coordinate), tokens
-        | Text { Value = _; Coordinate = c }::_ ->
+        | Text { Value = _; Coordinate = c; FileName = f }::_ ->
             let md, tail =
                 tokens
-                |> getAllOnSameLine c.Line []
+                |> getAllOnSameLine f c.Line []
 
             tail
             |> getMarkdown (md::acc)
@@ -290,7 +290,7 @@ let private getContentLocation (hasExternals: bool) (tokens: LispToken list) =
 
 let getHeading (tokens: LispToken list) =
     match tokens with
-    | (Open ({ Value = value; Coordinate = c } as heading))::tail when value.StartsWith "#" ->
+    | (Open ({ Value = value; Coordinate = c; FileName = f } as heading))::tail when value.StartsWith "#" ->
         let depthMaybe =
             heading |> getHeadingDepth
 
@@ -302,13 +302,17 @@ let getHeading (tokens: LispToken list) =
             match textMaybe with
             | None -> Error $"Heading at %s{c.ToString ()} does not have text."
             | Some text ->
-                ({
-                    Depth = depth
-                    Value = text
-                    Coordinate = c
-                }
-                |> Heading, rest |> advanceToClose)
-                |> Ok
+                match rest with
+                | Open _::_ ->
+                    Error $"%s{f}\nHeading at %s{c.ToString ()} contains unescaped open parenthesis."
+                | _ ->
+                    ({
+                        Depth = depth
+                        Value = text
+                        Coordinate = c
+                    }
+                    |> Heading, rest |> advanceToClose)
+                    |> Ok
 
 let getLispParts (hasExternals: bool) (toc: TableOfContentsDefinition option) (lisps: LispToken list) =
     let rec getParts (acc: Part list) (toc: TableOfContentsDefinition option) (lisps: LispToken list) =

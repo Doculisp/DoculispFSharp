@@ -28,7 +28,7 @@ let private (|IsStartLisp|_|) = function
         Some ($"(dl", c::tail)
     | _ -> None
 
-let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
+let private mapLisp (filename: string) (linePtr: int) (charPtr: int) (document: char list) =
     let mutable lnPtr = linePtr
     let mutable cPtr = charPtr
     let mutable trueStart = { Line = -1; Char = -1 }
@@ -76,7 +76,7 @@ let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
             cPtr <- cPtr + 1
         | ')'::tail, Some st ->
             more <- false
-            result <- Ok (LispMap { Value = $"%s{current}".Trim(); Coordinate = st }, lnPtr, cPtr, tail)
+            result <- Ok (LispMap { Value = $"%s{current}".Trim(); Coordinate = st; FileName = filename }, lnPtr, cPtr, tail)
         | IsNewLine (ln, tail), _ ->
             doc <- tail
             current <- $"%s{current}%s{ln}"
@@ -89,7 +89,7 @@ let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
 
     result
 
-let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
+let private mapMultilineCodeBlock (filename: string) (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
         match document, start with
         | [], Some st ->
@@ -98,7 +98,7 @@ let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char 
             tail
             |> map linePtr (charPtr + ln.Length) (Some { Line = linePtr; Char = charPtr }) $"%s{current}%s{ln}"
         | IsMultiline (ln, tail), Some st ->
-            Ok (TextMap { Value = $"%s{current}%s{ln}".Trim (); Coordinate = st }, linePtr, charPtr + ln.Length, tail)
+            Ok (TextMap { Value = $"%s{current}%s{ln}".Trim (); Coordinate = st; FileName = filename }, linePtr, charPtr + ln.Length, tail)
         | IsEscaped '`' (esc, tail), _ ->
             tail
             |> map linePtr (charPtr + esc.Length) start $"%s{current}%s{esc}"
@@ -112,7 +112,7 @@ let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char 
     document
     |> map linePtr charPtr None ""
 
-let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
+let private mapInlineCodeBlock (filename: string) (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
         match document, start with
         | [], Some st ->
@@ -124,7 +124,7 @@ let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char lis
             tail
             |> map linePtr (charPtr + inl.Length) (charPtr |> getCoordinate linePtr |> Some) $"%s{current}%s{inl}"
         | IsInline (inl, tail), Some st ->
-            Ok (TextMap { Value = $"%s{current}%s{inl}"; Coordinate = st }, linePtr, charPtr, tail)
+            Ok (TextMap { Value = $"%s{current}%s{inl}"; Coordinate = st; FileName = filename }, linePtr, charPtr, tail)
         | IsNewLine _, Some st ->
             Error $"Inline code block at %s{st.ToString ()} contains a new line."
         | c::tail, _ ->
@@ -134,7 +134,7 @@ let private mapInlineCodeBlock (linePtr: int) (charPtr: int) (document: char lis
     document
     |> map linePtr charPtr None ""
 
-let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
+let private mapComment (filename: string) (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (acc: DocumentMap list) (start: Coordinate option) (document: char list) =
         match document, start with
         | [], Some st -> Error $"Comment at %s{st.ToString ()} is not closed."
@@ -149,7 +149,7 @@ let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
         | IsStartLisp _, _ ->
             let result =
                 document
-                |> mapLisp linePtr charPtr
+                |> mapLisp filename linePtr charPtr
 
             match result with
             | Ok (mapped, ln, c, tail) ->
@@ -163,7 +163,7 @@ let private mapComment (linePtr: int) (charPtr: int) (document: char list) =
     document
     |> map linePtr charPtr [] None
 
-let private mapText (linePointer: int) (charPointer: int) (documentChars: char list) =
+let private mapText (filename: string) (linePointer: int) (charPointer: int) (documentChars: char list) =
     let mutable linePtr = linePointer
     let mutable charPtr = charPointer
     let mutable start: Coordinate option = None
@@ -175,7 +175,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
     while not finished do
         match document, start with
         | [], Some st ->
-            endResult <- Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
+            endResult <- Ok (TextMap { Value = current.Trim (); Coordinate = st; FileName = filename }, linePtr, charPtr, document)
             finished <- true
         | IsNewLine (ln, tail), _ ->
             document <- tail
@@ -183,7 +183,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
             charPtr <- 0
             current <- $"%s{current}%s{ln}"
         | IsOpenComment _, Some st ->
-            endResult <- Ok (TextMap { Value = current.Trim (); Coordinate = st }, linePtr, charPtr, document)
+            endResult <- Ok (TextMap { Value = current.Trim (); Coordinate = st; FileName = filename }, linePtr, charPtr, document)
             finished <- true
         | IsEscaped '`' (esc, tail), None ->
             document <- tail
@@ -197,7 +197,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
         | IsMultiline _, None ->
             let result =
                 document
-                |> mapMultilineCodeBlock linePtr charPtr
+                |> mapMultilineCodeBlock filename linePtr charPtr
 
             match result with
             | Ok (mapped, ln, c, tail) ->
@@ -212,7 +212,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
         | IsMultiline _, _ ->
             let result =
                 document
-                |> mapMultilineCodeBlock linePtr charPtr
+                |> mapMultilineCodeBlock filename linePtr charPtr
 
             match result with
             | Ok (mapped, ln, c, tail) ->
@@ -226,7 +226,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
         | IsInline _, None _ ->
             let result =
                 document
-                |> mapInlineCodeBlock linePtr charPtr
+                |> mapInlineCodeBlock filename linePtr charPtr
 
             match result with
             | Ok (mapped, line, c, tail) ->
@@ -241,7 +241,7 @@ let private mapText (linePointer: int) (charPointer: int) (documentChars: char l
         | IsInline _, Some _ ->
             let result =
                 document
-                |> mapInlineCodeBlock linePtr charPtr
+                |> mapInlineCodeBlock filename linePtr charPtr
 
             match result with
             | Ok (mapped, line, c, tail) ->
@@ -280,7 +280,7 @@ let private mapMain (filename: string) (document: char seq) =
         | IsOpenComment _ ->
             let result =
                 document
-                |> mapComment linePtr charPtr
+                |> mapComment filename linePtr charPtr
                 
             match result with
             | Ok (lisps, line, c, tail) ->
@@ -290,7 +290,7 @@ let private mapMain (filename: string) (document: char seq) =
         | _ ->
             let result =
                 document
-                |> mapText linePtr charPtr
+                |> mapText filename linePtr charPtr
                 
             match result with
             | Ok (mapped, line, c, tail) ->

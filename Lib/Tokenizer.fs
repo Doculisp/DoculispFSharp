@@ -5,7 +5,7 @@ open Doculisp.Lib.DocumentTypes
 open Doculisp.Lib.TextHelpers
 open Doculisp.Lib.TokenTypes
 
-let private parseLisp (value: Value) =
+let private parseLisp (filename: string) (value: Value) =
     let rec parseAtom (current: string) (charPtr: int) (document: char list) =
         match document with
         | IsEscaped '(' (esc, tail)
@@ -65,7 +65,7 @@ let private parseLisp (value: Value) =
                 Error $"Open parentheses without atom at %s{(charPtr |> getCoordinate linePtr).ToString ()}."
             | Some value ->
                 rest
-                |> parse linePtr c ((Open { Value = value; Coordinate = charPtr |> getCoordinate linePtr })::acc)
+                |> parse linePtr c ((Open { Value = value; Coordinate = charPtr |> getCoordinate linePtr; FileName = filename })::acc)
         | ')'::tail ->
             tail
             |> parse linePtr (charPtr + 1) ((charPtr |> getCoordinate linePtr |> Close)::acc)
@@ -80,7 +80,7 @@ let private parseLisp (value: Value) =
                 |> parse linePtr c acc
             | Some value ->
                 tail
-                |> parse linePtr c ((Parameter { Value = value; Coordinate = charPtr |> getCoordinate linePtr })::acc)
+                |> parse linePtr c ((Parameter { Value = value; Coordinate = charPtr |> getCoordinate linePtr; FileName = filename })::acc)
 
     let lineIndex = value.Coordinate.Line - 1
     let charIndex = value.Coordinate.Char - 1
@@ -88,7 +88,7 @@ let private parseLisp (value: Value) =
     |> List.ofSeq
     |> parse lineIndex charIndex []
 
-let private parseMaps (fileName: string) (document: DocumentMap list) =
+let private parseMaps (filename: string) (document: DocumentMap list) =
     let rec parse (acc: Token list) (document: DocumentMap list) =
         match document with
         | [] -> acc |> List.rev |> Ok
@@ -98,13 +98,13 @@ let private parseMaps (fileName: string) (document: DocumentMap list) =
         | (LispMap value)::tail ->
             let result =
                 value
-                |> parseLisp
+                |> parseLisp filename
 
             match result with
             | Ok lisps ->
                 tail
                 |> parse ((Lisp lisps)::acc)
-            | Error errorValue -> Error $"%s{fileName}\n\n%s{errorValue}"
+            | Error errorValue -> Error $"%s{filename}\n\n%s{errorValue}"
 
     document
     |> parse []

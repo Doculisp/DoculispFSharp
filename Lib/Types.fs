@@ -19,6 +19,7 @@ type Value =
     {
         Value: string
         Coordinate: Coordinate
+        FileName: string
     }
 
 let combine<'a, 'b, 'c> (fn: 'a -> Result<'c, 'b>) (value: Result<'a, 'b>): Result<'c, 'b> =
