@@ -286,7 +286,7 @@ let private mapMain (filename: string) (document: char seq) =
             | Ok (lisps, line, c, tail) ->
                 tail
                 |> map line c ([lisps; acc] |> List.concat)
-            | Error errorMessage -> Error $"%s{filename}\n%s{errorMessage}"
+            | Error errorMessage -> Error $"%s{filename}\n\n%s{errorMessage}"
         | _ ->
             let result =
                 document
@@ -296,7 +296,7 @@ let private mapMain (filename: string) (document: char seq) =
             | Ok (mapped, line, c, tail) ->
                 tail
                 |> map line c (mapped::acc)
-            | Error errorMessage -> Error $"%s{filename}\n%s{errorMessage}"
+            | Error errorMessage -> Error $"%s{filename}\n\n%s{errorMessage}"
         
     document
     |> List.ofSeq

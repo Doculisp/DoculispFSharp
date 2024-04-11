@@ -104,7 +104,7 @@ let private parseMaps (fileName: string) (document: DocumentMap list) =
             | Ok lisps ->
                 tail
                 |> parse ((Lisp lisps)::acc)
-            | Error errorValue -> Error $"%s{fileName}\n%s{errorValue}"
+            | Error errorValue -> Error $"%s{fileName}\n\n%s{errorValue}"
 
     document
     |> parse []

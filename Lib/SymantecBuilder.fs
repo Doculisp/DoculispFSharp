@@ -380,14 +380,14 @@ let private buildTree (fileName: string) (tokens: Token list) =
         tokens |> getSectionMetaBlock
 
     match section with
-    | Error errorValue -> Error $"%s{fileName}\n%s{errorValue}"
+    | Error errorValue -> Error $"%s{fileName}\n\n%s{errorValue}"
     | Ok (_, Empty, tail) ->
         let partsMaybe =
             tail
             |> getParts false false
 
         match partsMaybe with
-        | Error errorValue -> Error $"%s{fileName}\n%s{errorValue}"
+        | Error errorValue -> Error $"%s{fileName}\n\n%s{errorValue}"
         | Ok (parts, _) ->
             if 0 < parts.Length then
                 {
