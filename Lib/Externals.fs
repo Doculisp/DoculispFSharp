@@ -8,12 +8,15 @@ open Doculisp.Lib.TextHelpers
 
 let rec processFile (path: string) =
     let currentDir =
-        System.Reflection.Assembly.GetEntryAssembly().Location
-        |> getPathOfFile
+        Directory.GetCurrentDirectory ()
 
     let sourceDir =
         path
-        |> getPathOfFile
+        |> getDirectoryFromFilePath
+
+    let path =
+        path
+        |> getFullPath
 
     try
         Directory.SetCurrentDirectory sourceDir

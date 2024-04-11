@@ -18,7 +18,7 @@ let getFullPath (pathToFile: string) =
 
     info.FullName
 
-let getPathOfFile (pathToFile: string) =
+let getDirectoryFromFilePath (pathToFile: string) =
     let info =
         pathToFile
         |> FileInfo
