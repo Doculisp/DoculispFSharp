@@ -51,34 +51,21 @@ let main (parameters: string array) =
 
                 info.FullName
 
-            let currentDir =
-                System.Reflection.Assembly.GetEntryAssembly().Location
-                |> getDirectoryForFile
+            printf $"%s{source} --> %s{target}"
+            if isTest then printf " (TEST)"
+            printfn "\n\n"
 
-            let sourceDirectory =
+            let buildResult =
                 source
-                |> getDirectoryForFile
+                |> Compiler.compile isTest target
 
-            try
-                printf $"%s{source} --> %s{target}"
-                if isTest then printf " (TEST)"
-                printfn "\n\n"
-
-                Directory.SetCurrentDirectory sourceDirectory
-
-                let buildResult =
-                    source
-                    |> Compiler.compile isTest target
-
-                match buildResult with
-                | Error errorValue ->
-                    eprintfn $"%s{errorValue}"
-                    1
-                | Ok _ ->
-                    printfn $"\nSuccessfully built \"%s{target}\""
-                    0
-            finally
-                Directory.SetCurrentDirectory currentDir
+            match buildResult with
+            | Error errorValue ->
+                eprintfn $"%s{errorValue}"
+                1
+            | Ok _ ->
+                printfn $"\nSuccessfully built \"%s{target}\""
+                0
     with
     | :? ArguParseException as e ->
         eprintfn $"%s{e.Message}"

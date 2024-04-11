@@ -11,6 +11,20 @@ let loadFile (path: string) =
     with
     | e -> Error $"%s{path}\n\n%A{e}"
 
+let getFullPath (pathToFile: string) =
+    let info =
+        pathToFile
+        |> FileInfo
+
+    info.FullName
+
+let getPathOfFile (pathToFile: string) =
+    let info =
+        pathToFile
+        |> FileInfo
+
+    info.Directory.FullName
+
 
 let getWriter (testRun: bool, path: string) =
     if testRun then

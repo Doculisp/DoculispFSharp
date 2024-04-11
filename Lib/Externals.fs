@@ -1,18 +1,32 @@
 ﻿module Doculisp.Lib.Externals
 
+open System.IO
 open Doculisp.Lib
 open Doculisp.Lib.SymantecTypes
 open Doculisp.Lib.IoHelpers
 open Doculisp.Lib.TextHelpers
 
 let rec processFile (path: string) =
-    path
-    |> loadFile
-    |> stringMaybeToSeqMaybe
-    |> Document.map path
-    |> Tokenizer.parse path
-    |> SymantecBuilder.build path
-    |> load
+    let currentDir =
+        System.Reflection.Assembly.GetEntryAssembly().Location
+        |> getPathOfFile
+
+    let sourceDir =
+        path
+        |> getPathOfFile
+
+    try
+        Directory.SetCurrentDirectory sourceDir
+
+        path
+        |> loadFile
+        |> stringMaybeToSeqMaybe
+        |> Document.map path
+        |> Tokenizer.parse path
+        |> SymantecBuilder.build path
+        |> load
+    finally
+        Directory.SetCurrentDirectory currentDir
 
 and private loadExternals (externals: External list) =
     let rec loadExternals (acc: External list) (externals: External list) =
