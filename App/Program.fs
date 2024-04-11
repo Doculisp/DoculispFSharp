@@ -76,7 +76,7 @@ let main (parameters: string array) =
                     source
                     |> getFile
                     |> Document.map source
-                    |> Tokenizer.parse
+                    |> Tokenizer.parse source
                     |> SymantecBuilder.build
                     |> Externals.load
                     |> SymantecTree.processBuildResult writer

@@ -88,7 +88,7 @@ let private parseLisp (value: Value) =
     |> List.ofSeq
     |> parse lineIndex charIndex []
 
-let private parseMaps (document: DocumentMap list) =
+let private parseMaps (fileName: string) (document: DocumentMap list) =
     let rec parse (acc: Token list) (document: DocumentMap list) =
         match document with
         | [] -> acc |> List.rev |> Ok
@@ -104,10 +104,11 @@ let private parseMaps (document: DocumentMap list) =
             | Ok lisps ->
                 tail
                 |> parse ((Lisp lisps)::acc)
-            | Error errorValue -> Error errorValue
+            | Error errorValue -> Error $"%s{fileName}\n%s{errorValue}"
 
     document
     |> parse []
 
-let parse (document: Result<DocumentMap list, string>) =
-    combine parseMaps document
+let parse (fileName: string) (document: Result<DocumentMap list, string>) =
+    document
+    |> combine (parseMaps fileName)
