@@ -1,6 +1,6 @@
 ﻿module Doculisp.Lib.SymantecTree
 
-open System.Text
+open System.IO
 open Doculisp.Lib
 open Doculisp.Lib.SymantecTypes
 
@@ -8,22 +8,20 @@ let private formatHeading (depth: int) (text: string) =
     let hd = "".PadLeft (depth + 1, '#')
     $"%s{hd} %s{text} %s{hd}"
 
-type private Builder (builder: StringBuilder) =
+type private Builder (builder: TextWriter) =
     member this.AppendWithSpace (text: string) =
         text
         |> this.Append
 
         ""
-        |> builder.AppendLine
-        |> ignore
+        |> builder.WriteLine
 
     member _.Append (text: string) =
         text
-        |> builder.AppendLine
-        |> ignore
+        |> builder.WriteLine
 
     member _.AppendLine () =
-        builder.AppendLine ""
+        builder.WriteLine ()
 
 let private processToc (builder: Builder) (content: Content) =
     match content.Table with
@@ -41,16 +39,20 @@ let private processToc (builder: Builder) (content: Content) =
             |> builder.Append
         )
     | Numbered ->
+        let mutable cnt = 1
         content.Externals
         |> List.iter (fun external ->
-            $"# [%s{external.Title}](%s{external.Link})"
+            $"%d{cnt}. [%s{external.Title}](%s{external.Link})"
             |> builder.Append
+            cnt <- cnt + 1
         )
     | NumberedAndLabeled ->
+        let mutable cnt = 1
         content.Externals
         |> List.iter (fun external ->
-            $"# [%s{external.Label}: %s{external.Title}](%s{external.Link})"
+            $"%d{cnt}. [%s{external.Label}: %s{external.Title}](%s{external.Link})"
             |> builder.Append
+            cnt <- cnt + 1
         )
     | Bulleted ->
         content.Externals
@@ -64,6 +66,8 @@ let private processToc (builder: Builder) (content: Content) =
             $"- [%s{external.Label}: %s{external.Title}](%s{external.Link})"
             |> builder.Append
         )
+
+    builder.AppendLine ()
 
 let rec private processParts (content: Content) (builder: Builder) (depth: int) (parts: Part list) =
     let rec processEachPart (parts: Part list) =
@@ -114,7 +118,6 @@ and private processContent (builder: Builder) (depth: int) (content: Content) =
         |> formatHeading (depth + 2)
         |> builder.AppendWithSpace
 
-
 and private processTree (builder: Builder) (depth: int) (tree: Tree) =
     match tree with
     | Empty -> ()
@@ -122,16 +125,16 @@ and private processTree (builder: Builder) (depth: int) (tree: Tree) =
         content
         |> processContent builder depth
 
+        content.Parts
+        |> processParts content builder 0
 
-let processBuildResult (maybeTree: Result<Tree, string>) =
-    let sb = StringBuilder ()
-    let builder = sb |> Builder
+let processBuildResult (writer: TextWriter) (maybeTree: Result<Tree, string>) =
+    let builder = writer |> Builder
 
-    match maybeTree with
-    | Error errorValue -> Error errorValue
-    | Ok tree ->
-        tree
-        |> processTree builder 0
-
-        sb.ToString ()
-        |> Ok
+    try
+        maybeTree
+        |> combine (processTree builder 0 >> Ok)
+    with
+    | e ->
+        $"%A{e}"
+        |> Error

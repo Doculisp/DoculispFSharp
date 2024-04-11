@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		gittey-config.json = gittey-config.json
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Doculisp.Tests", "Tests\Doculisp.Tests.fsproj", "{F3C430F9-5956-4300-93A5-36D97687C577}"

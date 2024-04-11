@@ -13,6 +13,6 @@
         )
     )
 
-    (content (toc numbered-labled))
+    (content (toc numbered-labeled))
 )
 -->

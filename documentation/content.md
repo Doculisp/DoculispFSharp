@@ -1,7 +1,7 @@
 <!--
 (dl
     (section-meta
-        (title Content Block
+        (title Content Block)
     )
 )
 -->

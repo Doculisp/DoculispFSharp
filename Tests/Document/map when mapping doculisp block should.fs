@@ -69,12 +69,15 @@ Just look at its dynamic-ness
     )
 
 let ``error if the lisp does not properly close`` =
-    feature.Test (fun reporters env ->
-        "<!-- (dl (# My New Heading) -->"
-        |> stringToMaybeCharSeq
-        |> Document.map
-        |> formatMap
-        |> Should.MeetStandard reporters env.TestInfo
+    feature.Test (
+        TestBody(
+            fun reporters env ->
+            "<!-- (dl (# My New Heading) -->"
+            |> stringToMaybeCharSeq
+            |> Document.map
+            |> formatMap
+            |> Should.MeetStandard reporters env.TestInfo
+        )
     )
 
 let ``map a real markdown document`` =

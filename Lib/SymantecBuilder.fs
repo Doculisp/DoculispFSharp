@@ -63,7 +63,7 @@ let private getSectionMetaBlock (tokens: Token list) =
                 match tokens with
                 | [] ->
                     Ok (acc |> List.sortBy _.Index, tokens)
-                | (Close _)::_ when depth < 0 ->
+                | (Close _)::_ when depth < 1 ->
                     Ok (acc |> List.sortBy _.Index, tokens)
                 | (Close _)::tail ->
                     tail
@@ -95,7 +95,7 @@ let private getSectionMetaBlock (tokens: Token list) =
         let rec getSectionParts (depth: int) (title: string option) (subtitle: string option) (link: string option) (externals: External list) (tokens: LispToken list) =
             match tokens with
             | [] -> Ok (title, subtitle, link, externals, [])
-            | (Close _)::tail when 1 = depth ->
+            | (Close _)::tail when 0 = depth ->
                 Ok (title, subtitle, link, externals, tail)
             | (Close _)::tail ->
                 tail
@@ -261,14 +261,14 @@ let private getContentLocation (hasExternals: bool) (tokens: LispToken list) =
                 match parameter with
                 | None -> NoTable |> Ok
                 | Some value ->
-                    match value with
-                    | "NoTable" -> NoTable |> Ok
-                    | "Unlabeled" -> Unlabeled |> Ok
-                    | "Labeled" -> Labeled |> Ok
-                    | "Numbered" -> Numbered |> Ok
-                    | "NumberedAndLabeled" -> NumberedAndLabeled |> Ok
-                    | "Bulleted" -> Bulleted |> Ok
-                    | "BulletedAndLabeled" -> BulletedAndLabeled |> Ok
+                    match value.ToLowerInvariant () with
+                    | "no-table" -> NoTable |> Ok
+                    | "unlabeled" -> Unlabeled |> Ok
+                    | "labeled" -> Labeled |> Ok
+                    | "numbered" -> Numbered |> Ok
+                    | "numbered-labeled" -> NumberedAndLabeled |> Ok
+                    | "bulleted" -> Bulleted |> Ok
+                    | "bulleted-labeled" -> BulletedAndLabeled |> Ok
                     | _ -> Error $"TOC at %s{c.ToString ()} has invalid parameter %A{value}."
 
             toc, rest |> advanceToClose

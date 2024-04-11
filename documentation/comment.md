@@ -1,7 +1,7 @@
 <!--
 (dl
     (section-meta
-        (title Comment Block
+        (title Comment Block)
     )
 )
 -->

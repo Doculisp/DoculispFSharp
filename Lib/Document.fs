@@ -29,39 +29,65 @@ let private (|IsStartLisp|_|) = function
     | _ -> None
 
 let private mapLisp (linePtr: int) (charPtr: int) (document: char list) =
-    let rec map (linePtr: int) (charPtr: int) (depth: int) (trueStart: Coordinate) (start: Coordinate option) (current: string) (document: char list) =
-        match document, start with
-        | [], Some st ->
-            Error $"Doculisp block at %s{trueStart.ToString ()} is not closed."
-        | IsStartLisp (lisp, tail), None ->
-            tail
-            |> map linePtr (charPtr + lisp.Length) (depth + 1) (charPtr |> getCoordinate linePtr) None current
-        | IsEscaped '(' (esc, tail), _ ->
-            tail
-            |> map linePtr (charPtr + esc.Length) depth trueStart start $"%s{current}%s{esc}"
-        | IsEscaped ')' (esc, tail), _ ->
-            tail
-            |> map linePtr (charPtr + esc.Length) depth trueStart start $"%s{current}%s{esc}"
-        | '('::tail, None ->
-            tail
-            |> map linePtr (charPtr + 1) (depth + 1) trueStart (charPtr |> getCoordinate linePtr |> Some) $"%s{current}("
-        | '('::tail, _ ->
-            tail
-            |> map linePtr (charPtr + 1) (depth + 1) trueStart start $"%s{current}("
-        | ')'::tail, _ when 1 < depth ->
-            tail
-            |> map linePtr (charPtr + 1) (depth - 1) trueStart start $"%s{current})"
-        | ')'::tail, Some st ->
-            Ok (LispMap { Value = $"%s{current}".Trim(); Coordinate = st }, linePtr, charPtr, tail)
-        | IsNewLine (ln, tail), _ ->
-            tail
-            |> map (linePtr + 1) 0 depth trueStart start $"%s{current}%s{ln}"
-        | c::tail, _ ->
-            tail
-            |> map linePtr (charPtr + 1) depth trueStart start $"%s{current}%c{c}"
+    let mutable lnPtr = linePtr
+    let mutable cPtr = charPtr
+    let mutable trueStart = { Line = -1; Char = -1 }
+    let mutable current = ""
+    let mutable doc = document
+    let mutable start = Option<Coordinate>.None
+    let mutable depth = 0
+    let mutable more = true
 
-    document
-    |> map linePtr charPtr 0 { Line = -1; Char = -1 } None ""
+    let mutable result = Result<DocumentMap * int * int * char list, string>.Error "None"
+
+    while more do
+        match doc, start with
+        | [], Some _ ->
+            more <- false
+            result <-
+                Error $"Doculisp block at %s{trueStart.ToString ()} is not closed."
+        | IsStartLisp (lisp, tail), None ->
+            doc <- tail
+            trueStart <- cPtr |> getCoordinate linePtr
+            depth <- depth + 1
+            cPtr <- cPtr + lisp.Length
+        | IsEscaped '(' (esc, tail), _ ->
+            doc <- tail
+            current <- $"%s{current}%s{esc}"
+            cPtr <- cPtr + esc.Length
+        | IsEscaped ')' (esc, tail), _ ->
+            doc <- tail
+            current <- $"%s{current}%s{esc}"
+            cPtr <- cPtr + esc.Length
+        | '('::tail, None ->
+            doc <- tail
+            current <- $"%s{current}("
+            start <- (cPtr |> getCoordinate lnPtr |> Some)
+            depth <- depth + 1
+        | '('::tail, _ ->
+            doc <- tail
+            current <- $"%s{current}("
+            depth <- depth + 1
+            cPtr <- cPtr + 1
+        | ')'::tail, _ when 1 < depth ->
+            doc <- tail
+            current <- $"%s{current})"
+            depth <- depth - 1
+            cPtr <- cPtr + 1
+        | ')'::tail, Some st ->
+            more <- false
+            result <- Ok (LispMap { Value = $"%s{current}".Trim(); Coordinate = st }, lnPtr, cPtr, tail)
+        | IsNewLine (ln, tail), _ ->
+            doc <- tail
+            current <- $"%s{current}%s{ln}"
+            cPtr <- 0
+            lnPtr <- lnPtr + 1
+        | c::tail, _ ->
+            doc <- tail
+            current <- $"%s{current}%c{c}"
+            cPtr <- cPtr + 1
+
+    result
 
 let private mapMultilineCodeBlock (linePtr: int) (charPtr: int) (document: char list) =
     let rec map (linePtr: int) (charPtr: int) (start: Coordinate option) (current: string) (document: char list) =
