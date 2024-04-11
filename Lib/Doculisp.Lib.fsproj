@@ -17,6 +17,7 @@
     <Compile Include="SymantecBuilder.fs" />
     <Compile Include="Externals.fs" />
     <Compile Include="SymantecTree.fs" />
+    <Compile Include="Compiler.fs" />
   </ItemGroup>
 
 </Project>

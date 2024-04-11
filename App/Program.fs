@@ -1,6 +1,5 @@
 ﻿open System
 open System.IO
-open System.Text
 open Argu
 open Doculisp.Lib
 
@@ -15,24 +14,12 @@ type Arguments =
             | SourceFile s -> "The toplevel markdown file to compile."
             | Test -> "Runs the compiler without outputting the file. It will show errors if there are any."
 
-let getWriter (testRun: bool, path: string) =
-    if testRun then
-        let sb = StringBuilder ()
-        (new StringWriter (sb)) :> TextWriter
-    else
-        (new StreamWriter (path, false)) :> TextWriter
-
-let getFile (path: string) =
-    try
+let private getDirectoryForFile (path: string) =
+    let info =
         path
-        |> File.ReadAllText
-        |> fun s -> s.ToCharArray ()
-        |> Array.toSeq
-        |> Ok
-    with
-    | e ->
-        $"%A{e}"
-        |> Error
+        |> FileInfo
+
+    info.Directory.FullName
 
 
 [<STAThread; EntryPoint>]
@@ -51,38 +38,20 @@ let main (parameters: string array) =
             let isTest = results.Contains Test
 
 
-            use writer = getWriter (isTest, target)
-
             let currentDir =
-                let info =
-                    System.Reflection.Assembly.GetEntryAssembly().Location
-                    |> FileInfo
-
-                info.Directory.FullName
+                System.Reflection.Assembly.GetEntryAssembly().Location
+                |> getDirectoryForFile
 
             let sourceDirectory =
-                let info =
-                    source
-                    |> FileInfo
-
-                info.Directory.FullName
+                source
+                |> getDirectoryForFile
 
             try
                 Directory.SetCurrentDirectory sourceDirectory
 
-                writer.WriteLine "<!-- Generated Document do not edit! -->\n"
-
                 let buildResult =
                     source
-                    |> getFile
-                    |> Document.map source
-                    |> Tokenizer.parse source
-                    |> SymantecBuilder.build source
-                    |> Externals.load
-                    |> SymantecTree.processBuildResult writer
-
-                writer.WriteLine "<!-- Generated Document do not edit! -->"
-                writer.Flush ()
+                    |> Compiler.compile isTest target
 
                 match buildResult with
                 | Error errorValue ->

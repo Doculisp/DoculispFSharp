@@ -5,7 +5,16 @@ open Doculisp.Lib.SymantecTypes
 open Doculisp.Lib.IoHelpers
 open Doculisp.Lib.TextHelpers
 
-let rec private loadExternals (externals: External list) =
+let rec processFile (path: string) =
+    path
+    |> loadFile
+    |> stringMaybeToSeqMaybe
+    |> Document.map path
+    |> Tokenizer.parse path
+    |> SymantecBuilder.build path
+    |> load
+
+and private loadExternals (externals: External list) =
     let rec loadExternals (acc: External list) (externals: External list) =
         match externals with
         | [] -> acc |> List.sortBy _.Index |> Ok
@@ -13,20 +22,12 @@ let rec private loadExternals (externals: External list) =
             tail
             |> loadExternals (ext::acc)
         | external::tail ->
-            let file =
-                external.Path
-                |> loadFile
-
             let sectionMaybe =
-                file
-                |> stringMaybeToSeqMaybe
-                |> Document.map external.Path
-                |> Tokenizer.parse external.Path
-                |> SymantecBuilder.build external.Path
-                |> load
+                external.Path
+                |> processFile
 
             match sectionMaybe with
-            | Error errorValue -> Error $"%A{external.Path} has error:\n%A{errorValue}"
+            | Error errorValue -> Error errorValue
             | Ok tree ->
                 let ext =
 
