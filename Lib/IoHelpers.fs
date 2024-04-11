@@ -9,7 +9,7 @@ let loadFile (path: string) =
         |> File.ReadAllText
         |> Ok
     with
-    | e -> Error $"%A{e}"
+    | e -> Error $"%s{path}\n\n%A{e}"
 
 
 let getWriter (testRun: bool, path: string) =

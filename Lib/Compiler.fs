@@ -19,4 +19,4 @@ let compile (isTest: bool) (toFile: string) (fromFile: string) =
             writer.Flush ()
             Ok ()
     with
-    | e -> Error $"%A{e}"
+    | e -> Error $"FROM: %s{fromFile}\nTO: %s{toFile}\n\n%A{e}"
